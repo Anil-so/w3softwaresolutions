@@ -22,7 +22,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Visit Us",
-      value: "ShivaJi Nager, Pune, 411005",
+      value: "Niwaru Rd, Jhotwara, Jaipur, 302012 Rajasthan",
       description: "Schedule an appointment",
     },
     {
