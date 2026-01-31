@@ -82,15 +82,15 @@ const Header = () => {
             <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-foreground hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
+              className="p-3 min-h-[48px] min-w-[48px] flex items-center justify-center text-foreground hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md active:bg-primary/10"
               aria-label="Toggle menu"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
             >
               {isMenuOpen ? (
-                <X className="h-7 w-7 animate-in spin-in-90 duration-300" />
+                <X className="h-6 w-6 animate-in spin-in-90 duration-300" />
               ) : (
-                <Menu className="h-7 w-7 animate-in fade-in zoom-in duration-300" />
+                <Menu className="h-6 w-6 animate-in fade-in zoom-in duration-300" />
               )}
             </button>
           </div>

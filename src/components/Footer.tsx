@@ -42,7 +42,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#0B0F19] text-white relative overflow-hidden pt-20 border-t border-white/5 dark:border-border">
+    <footer className="bg-[#0B0F19] text-white relative overflow-hidden pt-16 sm:pt-20 border-t border-white/5 dark:border-border">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
@@ -50,7 +50,7 @@ const Footer = () => {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-16">
           {/* Company Info */}
           <div className="lg:col-span-2 space-y-6">
             <Link to="/" className="inline-block">

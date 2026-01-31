@@ -34,7 +34,7 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+    <section id="contact" className="py-16 sm:py-28 bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent pointer-events-none"></div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -61,13 +61,13 @@ const Contact = () => {
           {/* Contact Form */}
           <Card className="bg-card/70 dark:bg-card/30 backdrop-blur-md border-border/50 shadow-strong animate-slide-in-left relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
-            <CardHeader className="pb-2 pt-8 px-8">
+            <CardHeader className="pb-2 pt-8 px-6 sm:px-8">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
                 <MessageSquare className="h-6 w-6 text-primary" />
                 Send us a Message
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6 sm:p-8">
               <form
                 className="space-y-6"
                 action="https://formsubmit.co/web3softwaresolutionsinfo@gmail.com"

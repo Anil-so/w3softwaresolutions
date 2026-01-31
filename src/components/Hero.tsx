@@ -19,14 +19,14 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 sm:pt-32 pb-12 sm:pb-20">
         <div className="max-w-4xl mx-auto animate-fade-in">
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-tight drop-shadow-sm">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-tight drop-shadow-sm px-2">
             Crafting Digital Excellence
             <span className="block text-primary mt-2">One Solution at a Time</span>
           </h1>
 
-          <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-xl lg:text-2xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
             We transform your ideas into powerful websites and applications.
             Professional development solution tailored for your business success.
           </p>

@@ -70,7 +70,7 @@ const Services = () => {
 
   return (
     <>
-      <section id="services" className="py-20 sm:py-28 bg-background relative overflow-hidden transition-colors duration-500">
+      <section id="services" className="py-16 sm:py-28 bg-background relative overflow-hidden transition-colors duration-500">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 dark:from-primary/10 dark:via-background dark:to-accent/5"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 sm:mb-20 animate-fade-in">
@@ -189,25 +189,36 @@ const Services = () => {
           {/* Primary Technologies Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-16">
             {[
-              { name: "React", icon: "⚛️", color: "from-blue-500 to-cyan-500", desc: "Frontend Framework" },
-              { name: "Next.js", icon: "▲", color: "from-gray-700 to-gray-900", desc: "Full-stack Framework" },
-              { name: "TypeScript", icon: "TS", color: "from-blue-600 to-blue-700", desc: "Type Safety" },
-              { name: "Tailwind", icon: "🎨", color: "from-teal-500 to-blue-600", desc: "CSS Framework" },
-              { name: "Node.js", icon: "🟢", color: "from-green-500 to-green-600", desc: "Backend Runtime" },
-              { name: "PostgreSQL", icon: "🐘", color: "from-blue-500 to-indigo-600", desc: "Database" },
+              { name: "React", icon: "⚛️", image: "/assets/React.png", color: "from-blue-500 to-cyan-500", desc: "Frontend Framework" },
+              { name: "Next.js", icon: "▲", image: null, color: "from-gray-700 to-gray-900", desc: "Full-stack Framework" },
+              { name: "TypeScript", icon: "TS", image: "/assets/TypeScript.png", color: "from-blue-600 to-blue-700", desc: "Type Safety" },
+              { name: "Tailwind", icon: "🎨", image: "/assets/Tailwind.png", color: "from-teal-500 to-blue-600", desc: "CSS Framework" },
+              { name: "Node.js", icon: "🟢", image: "/assets/Node.png", color: "from-green-500 to-green-600", desc: "Backend Runtime" },
+              { name: "PostgreSQL", icon: "🐘", image: "/assets/PostgreSQL.png", color: "from-blue-500 to-indigo-600", desc: "Database" },
             ].map((tech, index) => (
               <div
                 key={tech.name}
-                className="group relative p-6 bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 transform hover:scale-105 animate-scale-in"
+                className="group relative p-4 sm:p-6 bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 transform hover:scale-105 animate-scale-in flex flex-col items-center justify-center gap-3 sm:gap-4"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${tech.color} opacity-5 group-hover:opacity-15 transition-opacity duration-300 rounded-2xl`}></div>
-                <div className="relative text-center">
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300 animate-float" style={{ animationDelay: `${index * 0.2}s` }}>
-                    {tech.icon}
-                  </div>
-                  <h4 className="font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{tech.name}</h4>
-                  <p className="text-xs text-muted-foreground">{tech.desc}</p>
+                <div className={`absolute inset-0 bg-gradient-to-br ${tech.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl`}></div>
+
+                <div className="relative z-10 h-16 w-16 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                  {tech.image ? (
+                    <img
+                      src={tech.image}
+                      alt={`${tech.name} logo`}
+                      className="h-full w-full object-contain drop-shadow-sm"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-4xl">{tech.icon}</span>
+                  )}
+                </div>
+
+                <div className="relative text-center z-10">
+                  <h4 className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">{tech.name}</h4>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mt-1">{tech.desc}</p>
                 </div>
               </div>
             ))}

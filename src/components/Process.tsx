@@ -89,7 +89,7 @@ const Process = () => {
                   {index + 1}
                 </div>
 
-                <CardContent className="p-8">
+                <CardContent className="p-6 sm:p-8">
                   {/* Icon */}
                   <div className="mb-6">
                     <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 group-hover:rotate-3 text-primary">
@@ -155,7 +155,7 @@ const Process = () => {
 
         {/* Enhanced CTA Section */}
         <div className="relative">
-          <div className="bg-gradient-to-r from-primary/10 via-white/80 to-secondary/10 backdrop-blur-sm rounded-3xl p-12 border border-primary/20 text-center shadow-2xl">
+          <div className="bg-gradient-to-r from-primary/10 via-white/80 to-secondary/10 backdrop-blur-sm rounded-3xl p-6 sm:p-12 border border-primary/20 text-center shadow-2xl">
             <div className="max-w-3xl mx-auto">
               <h3 className="text-3xl font-bold text-foreground mb-4">
                 Ready to Transform Your Ideas Into Reality?

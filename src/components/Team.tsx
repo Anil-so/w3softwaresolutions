@@ -52,11 +52,11 @@ const Team = () => {
         </div>
 
         {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {teamMembers.map((member, index) => (
             <div
               key={member.id}
-              className="group h-full bg-card/60 backdrop-blur-md rounded-3xl border border-primary/10 hover:border-primary/30 shadow-md hover:shadow-2xl transition-all duration-500 relative flex flex-col items-center p-8 gap-6 hover:-translate-y-2"
+              className="group h-full bg-card/60 backdrop-blur-md rounded-3xl border border-primary/10 hover:border-primary/30 shadow-md hover:shadow-2xl transition-all duration-500 relative flex flex-col items-center p-6 sm:p-8 gap-6 hover:-translate-y-2"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
               {/* Member Photo */}
