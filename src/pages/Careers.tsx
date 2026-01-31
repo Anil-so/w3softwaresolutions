@@ -85,7 +85,7 @@ const Careers = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="mb-8">
           <Link to="/">
             <Button variant="ghost" className="mb-4">
@@ -95,7 +95,7 @@ const Careers = () => {
           </Link>
           <h1 className="text-4xl font-bold text-foreground mb-4">Join Our Team</h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
-            Be part of a dynamic team that's shaping the future of software development. 
+            Be part of a dynamic team that's shaping the future of software development.
             We're always looking for talented individuals who share our passion for innovation.
           </p>
         </div>
@@ -114,8 +114,8 @@ const Careers = () => {
                 <div>
                   <h3 className="font-semibold mb-3">Our Culture</h3>
                   <p className="text-muted-foreground mb-4">
-                    We foster a collaborative environment where creativity thrives and innovation 
-                    is encouraged. Our team values work-life balance, continuous learning, and 
+                    We foster a collaborative environment where creativity thrives and innovation
+                    is encouraged. Our team values work-life balance, continuous learning, and
                     delivering exceptional results for our clients.
                   </p>
                 </div>
@@ -190,7 +190,7 @@ const Careers = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              We're always interested in meeting talented individuals. Send us your resume and 
+              We're always interested in meeting talented individuals. Send us your resume and
               tell us about your skills and interests.
             </p>
             <Button>

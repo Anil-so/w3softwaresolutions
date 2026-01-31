@@ -21,7 +21,20 @@ const Header = () => {
   // Close menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
+    document.body.style.overflow = "unset";
   }, [location]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMenuOpen]);
 
   const navItems = [
     { name: "Home", href: "/" },

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const TermsOfService = () => {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="mb-8">
           <Link to="/">
             <Button variant="ghost" className="mb-4">
@@ -25,8 +25,8 @@ const TermsOfService = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                By accessing and using our services, you accept and agree to be bound by the terms 
-                and provision of this agreement. If you do not agree to abide by the above, please 
+                By accessing and using our services, you accept and agree to be bound by the terms
+                and provision of this agreement. If you do not agree to abide by the above, please
                 do not use this service.
               </p>
             </CardContent>
@@ -38,8 +38,8 @@ const TermsOfService = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                W3 Software Solutions provides web development, mobile application development, 
-                custom software solutions, and related technology services. We reserve the right 
+                W3 Software Solutions provides web development, mobile application development,
+                custom software solutions, and related technology services. We reserve the right
                 to modify or discontinue our services at any time.
               </p>
             </CardContent>
@@ -66,8 +66,8 @@ const TermsOfService = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                All content, features, and functionality of our services are owned by W3 Software 
-                Solutions and are protected by international copyright, trademark, and other 
+                All content, features, and functionality of our services are owned by W3 Software
+                Solutions and are protected by international copyright, trademark, and other
                 intellectual property laws.
               </p>
             </CardContent>
@@ -98,8 +98,8 @@ const TermsOfService = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                W3 Software Solutions shall not be liable for any indirect, incidental, special, 
-                consequential, or punitive damages, including without limitation, loss of profits, 
+                W3 Software Solutions shall not be liable for any indirect, incidental, special,
+                consequential, or punitive damages, including without limitation, loss of profits,
                 data, use, goodwill, or other intangible losses.
               </p>
             </CardContent>
