@@ -42,7 +42,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-foreground text-background relative overflow-hidden pt-20">
+    <footer className="bg-[#0B0F19] text-white relative overflow-hidden pt-20 border-t border-white/5 dark:border-border">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
@@ -58,7 +58,7 @@ const Footer = () => {
                 W3 Software Solutions
               </span>
             </Link>
-            <p className="text-muted/60 leading-relaxed max-w-md text-lg">
+            <p className="text-gray-400 leading-relaxed max-w-md text-lg">
               Transforming ideas into powerful digital solutions. We create
               websites and applications that drive business growth and deliver
               exceptional user experiences.

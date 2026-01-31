@@ -142,7 +142,7 @@ const Testimonials = () => {
           {testimonials.map((testimonial, index) => (
             <Card
               key={testimonial.id}
-              className="bg-card border-border hover:border-primary/30 shadow-sm hover:shadow-xl transition-all duration-500 group animate-fade-in flex flex-col h-full"
+              className="bg-card/70 dark:bg-card/30 backdrop-blur-md border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-xl transition-all duration-500 group animate-fade-in flex flex-col h-full"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
               <CardContent className="p-8 flex flex-col h-full">

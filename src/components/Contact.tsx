@@ -59,7 +59,7 @@ const Contact = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Contact Form */}
-          <Card className="bg-card/50 backdrop-blur-md border-border/50 shadow-strong animate-slide-in-left relative overflow-hidden">
+          <Card className="bg-card/70 dark:bg-card/30 backdrop-blur-md border-border/50 shadow-strong animate-slide-in-left relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
             <CardHeader className="pb-2 pt-8 px-8">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -89,7 +89,7 @@ const Contact = () => {
                       name="firstName"
                       placeholder="John"
                       required
-                      className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
+                      className="bg-background/50 dark:bg-background/30 border-input/50 focus:border-primary/50 transition-colors h-11"
                     />
                   </div>
                   <div className="space-y-2">
@@ -99,7 +99,7 @@ const Contact = () => {
                       name="lastName"
                       placeholder="Doe"
                       required
-                      className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
+                      className="bg-background/50 dark:bg-background/30 border-input/50 focus:border-primary/50 transition-colors h-11"
                     />
                   </div>
                 </div>

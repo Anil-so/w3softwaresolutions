@@ -83,7 +83,7 @@ const Process = () => {
               className="group animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <Card className="h-full bg-card/60 dark:bg-card/30 backdrop-blur-md border border-primary/10 hover:border-primary/40 transition-all duration-500 hover:shadow-strong hover:-translate-y-1 relative overflow-hidden">
+              <Card className="h-full bg-card/70 dark:bg-card/30 backdrop-blur-md border border-primary/10 hover:border-primary/40 transition-all duration-500 hover:shadow-strong hover:-translate-y-1 relative overflow-hidden">
                 {/* Step Number Badge */}
                 <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
                   {index + 1}

@@ -33,24 +33,24 @@ const Hero = () => {
 
           {/* Services Preview */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12">
-            <div className="flex items-center gap-3 text-foreground/80 bg-background/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border/50">
-              <Code className="h-5 w-5 text-primary" />
-              <span className="font-medium text-sm sm:text-base">Web Development</span>
+            <div className="flex items-center gap-3 text-foreground bg-background/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-primary/20 shadow-sm">
+              <Code className="h-5 w-5 text-primary" aria-hidden="true" />
+              <span className="font-semibold text-sm sm:text-base">Web Development</span>
             </div>
-            <div className="hidden sm:block w-px h-8 bg-border"></div>
-            <div className="flex items-center gap-3 text-foreground/80 bg-background/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border/50">
-              <Smartphone className="h-5 w-5 text-primary" />
-              <span className="font-medium text-sm sm:text-base">App Development</span>
+            <div className="hidden sm:block w-px h-8 bg-border/60"></div>
+            <div className="flex items-center gap-3 text-foreground bg-background/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-primary/20 shadow-sm">
+              <Smartphone className="h-5 w-5 text-primary" aria-hidden="true" />
+              <span className="font-semibold text-sm sm:text-base">App Development</span>
             </div>
           </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="premium" size="lg" className="w-full sm:w-auto h-12 px-8 text-lg shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 group">
+            <Button variant="premium" size="lg" className="w-full sm:w-auto h-12 px-8 text-lg font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-all duration-300 group">
               Start Your Project
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-lg border-primary/20 hover:bg-primary/5 hover:text-primary transition-all duration-300 backdrop-blur-sm" asChild>
+            <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-lg border-primary/20 hover:bg-primary/5 hover:text-primary hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-all duration-300 backdrop-blur-sm bg-background/30" asChild>
               <Link to="/our-work">View Our Work</Link>
             </Button>
           </div>

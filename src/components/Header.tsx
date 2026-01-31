@@ -82,8 +82,10 @@ const Header = () => {
             <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-foreground hover:text-primary transition-colors focus:outline-none"
+              className="p-2 text-foreground hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
               aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
             >
               {isMenuOpen ? (
                 <X className="h-7 w-7 animate-in spin-in-90 duration-300" />
@@ -97,7 +99,8 @@ const Header = () => {
 
       {/* Mobile Navigation Overlay */}
       <div
-        className={`fixed inset-0 bg-background/95 backdrop-blur-xl z-40 md:hidden transition-all duration-500 ease-in-out ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
+        id="mobile-menu"
+        className={`fixed inset-0 bg-background/98 backdrop-blur-xl z-40 md:hidden transition-all duration-500 ease-in-out ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
           }`}
         style={{ top: "0", paddingTop: "80px" }}
       >

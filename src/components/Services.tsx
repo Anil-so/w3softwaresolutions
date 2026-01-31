@@ -75,8 +75,8 @@ const Services = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 sm:mb-20 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/20 px-4 py-2 rounded-full mb-6 border border-primary/10">
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Premium Services</span>
+              <Zap className="h-4 w-4 text-primary" aria-hidden="true" />
+              <span className="text-sm font-semibold text-primary">Premium Services</span>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight">
               What We <span className="text-primary relative inline-block">
@@ -96,7 +96,7 @@ const Services = () => {
             {services.map((service, index) => (
               <Card
                 key={service.title}
-                className="group relative overflow-hidden border border-border/50 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:shadow-strong transition-all duration-500 hover:-translate-y-2"
+                className="group relative overflow-hidden border border-border/50 bg-card/70 dark:bg-card/30 backdrop-blur-md hover:shadow-strong transition-all duration-500 hover:-translate-y-2"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
 
@@ -151,7 +151,8 @@ const Services = () => {
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+            ))
+            }
           </div>
 
           <div className="text-center mt-16 sm:mt-24">
