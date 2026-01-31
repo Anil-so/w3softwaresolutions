@@ -1,4 +1,4 @@
-import { Github, Linkedin, Twitter } from "lucide-react";
+import { Linkedin, Instagram } from "lucide-react";
 
 const teamMembers = [
   {
@@ -9,8 +9,7 @@ const teamMembers = [
     description: "Co-founder and full-stack developer with deep expertise in React, Node.js, and cloud solutions. Leads the team in delivering innovative and scalable digital products.",
     social: {
       linkedin: "#",
-      github: "#",
-      twitter: "#"
+      instagram: "#"
     }
   },
   {
@@ -21,8 +20,7 @@ const teamMembers = [
     description: "Co-founder with expertise in frontend and backend development. Skilled in building interactive web interfaces using modern technologies.",
     social: {
       linkedin: "#",
-      github: "#",
-      twitter: "#"
+      instagram: "#"
     }
   },
   {
@@ -33,11 +31,10 @@ const teamMembers = [
     description: "Expert in WordPress development and frontend technologies.",
     social: {
       linkedin: "#",
-      github: "#",
-      twitter: "#"
+      instagram: "#"
     }
   },
-  
+
 ];
 
 const Team = () => {
@@ -67,7 +64,7 @@ const Team = () => {
                 <img
                   src={member.image}
                   alt={member.name}
-                  className="w-32 h-32 object-cover rounded-full border-4 border-primary shadow-xl group-hover:scale-105 transition-transform duration-500 bg-white"
+                  className="w-32 h-32 object-cover object-top rounded-full border-4 border-primary shadow-xl group-hover:scale-105 transition-transform duration-500 bg-white"
                   style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}
                 />
                 {/* Social Links - appear on hover, floating above image */}
@@ -80,18 +77,11 @@ const Team = () => {
                     <Linkedin className="h-5 w-5" />
                   </a>
                   <a
-                    href={member.social.github}
+                    href={member.social.instagram}
                     className="p-2 bg-white/90 rounded-full hover:bg-primary hover:text-white shadow transition-colors duration-300 border border-primary/20"
-                    aria-label={`${member.name} GitHub`}
+                    aria-label={`${member.name} Instagram`}
                   >
-                    <Github className="h-5 w-5" />
-                  </a>
-                  <a
-                    href={member.social.twitter}
-                    className="p-2 bg-white/90 rounded-full hover:bg-primary hover:text-white shadow transition-colors duration-300 border border-primary/20"
-                    aria-label={`${member.name} Twitter`}
-                  >
-                    <Twitter className="h-5 w-5" />
+                    <Instagram className="h-5 w-5" />
                   </a>
                 </div>
               </div>
