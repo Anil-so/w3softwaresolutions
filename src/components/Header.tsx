@@ -117,32 +117,38 @@ const Header = () => {
         <div
           className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0"}`}
           onClick={() => setIsMenuOpen(false)}
+          style={{ touchAction: "none" }}
         />
 
         {/* Drawer */}
         <div
-          className={`absolute top-0 right-0 bottom-0 w-[85%] max-w-[320px] bg-background shadow-2xl border-l border-border/50 transition-transform duration-300 ease-out flex flex-col ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`absolute top-0 right-0 bottom-0 w-[85%] max-w-[320px] bg-background shadow-2xl border-l border-border/50 transition-transform duration-300 ease-out flex flex-col h-[100dvh] ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           {/* Drawer Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border/50">
+          <div className="flex items-center justify-between p-6 border-b border-border/50 shrink-0">
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <img src={logo} alt="Logo" className="h-6 w-6" />
               </div>
               <span className="font-bold text-lg">Menu</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMenuOpen(false)}
+              className="h-10 w-10 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full"
+            >
               <X className="h-6 w-6" />
             </Button>
           </div>
 
           {/* Drawer Links */}
-          <nav className="flex flex-col p-6 space-y-2 overflow-y-auto flex-1 bg-background">
+          <nav className="flex flex-col p-6 space-y-2 overflow-y-auto flex-1 bg-background overscroll-contain">
             {navItems.map((item, idx) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className="flex items-center justify-between p-4 rounded-xl text-lg font-medium text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 group"
+                className="flex items-center justify-between p-4 rounded-xl text-lg font-medium text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 group active:scale-[0.98]"
                 onClick={() => setIsMenuOpen(false)}
                 style={{ transitionDelay: `${idx * 50}ms` }}
               >
@@ -153,14 +159,14 @@ const Header = () => {
 
             <div className="my-6 border-t border-border/50" />
 
-            <div className="space-y-4">
+            <div className="space-y-4 pb-8">
               <div className="flex items-center justify-between px-4">
                 <span className="text-sm font-medium text-muted-foreground">Appearance</span>
                 <ThemeToggle />
               </div>
-              <Button className="w-full rounded-xl py-6 shadow-lg shadow-primary/20 bg-gradient-primary">
+              <Button className="w-full rounded-xl py-6 shadow-lg shadow-primary/20 bg-gradient-primary text-lg font-semibold active:scale-[0.98] transition-transform">
                 Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </nav>
