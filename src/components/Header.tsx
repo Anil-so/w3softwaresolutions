@@ -33,9 +33,9 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || isMenuOpen
-          ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border/50"
-          : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${scrolled || isMenuOpen
+        ? "bg-background/95 backdrop-blur-md shadow-md border-b border-border/50 py-0"
+        : "bg-transparent py-2"
         }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,7 +97,7 @@ const Header = () => {
 
       {/* Mobile Navigation Overlay */}
       <div
-        className={`fixed inset-0 bg-background/98 backdrop-blur-xl z-40 md:hidden transition-all duration-500 ease-in-out ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
+        className={`fixed inset-0 bg-background/95 backdrop-blur-xl z-40 md:hidden transition-all duration-500 ease-in-out ${isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
           }`}
         style={{ top: "0", paddingTop: "80px" }}
       >
@@ -107,7 +107,7 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-2xl font-bold text-foreground/90 hover:text-primary py-4 border-b border-border/30 transition-all duration-300 flex justify-between items-center group"
+                className="text-2xl font-bold text-foreground/80 hover:text-primary py-4 border-b border-border/40 transition-all duration-300 flex justify-between items-center group"
                 style={{ transitionDelay: `${idx * 50}ms` }}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -118,10 +118,10 @@ const Header = () => {
           </nav>
 
           <div className="mt-auto pb-10 space-y-6">
-            <div className="p-6 bg-secondary/30 rounded-2xl border border-border/50">
-              <h4 className="font-semibold mb-2">Ready to start a project?</h4>
+            <div className="p-6 bg-card/40 rounded-2xl border border-border/50 shadow-lg">
+              <h4 className="font-bold text-foreground mb-2">Ready to start a project?</h4>
               <p className="text-muted-foreground text-sm mb-4">Let's build something amazing together.</p>
-              <Button className="w-full rounded-xl py-6 text-lg shadow-lg bg-gradient-primary">
+              <Button className="w-full rounded-xl py-6 text-lg shadow-lg shadow-primary/20 bg-gradient-primary">
                 Get Started
               </Button>
             </div>

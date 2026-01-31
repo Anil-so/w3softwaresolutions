@@ -52,33 +52,33 @@ const Team = () => {
         </div>
 
         {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {teamMembers.map((member, index) => (
             <div
               key={member.id}
-              className="group h-full bg-gradient-to-br from-white/95 to-secondary/20 rounded-3xl border border-primary/10 shadow-md hover:shadow-xl transition-all duration-500 relative flex flex-col items-center p-8 gap-6 animate-float"
+              className="group h-full bg-card/60 backdrop-blur-md rounded-3xl border border-primary/10 hover:border-primary/30 shadow-md hover:shadow-2xl transition-all duration-500 relative flex flex-col items-center p-8 gap-6 hover:-translate-y-2"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
               {/* Member Photo */}
               <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <img
                   src={member.image}
                   alt={member.name}
-                  className="w-32 h-32 object-cover object-top rounded-full border-4 border-primary/20 group-hover:border-primary shadow-lg group-hover:scale-105 transition-all duration-500 bg-white"
-                  style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)' }}
+                  className="w-32 h-32 object-cover object-top rounded-full border-4 border-background group-hover:border-primary/50 shadow-lg group-hover:scale-105 transition-all duration-500 relative z-10"
                 />
-                {/* Social Links - appear on hover, floating above image */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-500 z-10">
+                {/* Social Links */}
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-500 z-20">
                   <a
                     href={member.social.linkedin}
-                    className="p-2 bg-white rounded-full hover:bg-primary hover:text-white shadow-md transition-colors duration-300 border border-primary/10"
+                    className="p-2.5 bg-background rounded-full hover:bg-primary hover:text-white text-primary shadow-lg hover:shadow-primary/50 transition-all duration-300 border border-border"
                     aria-label={`${member.name} LinkedIn`}
                   >
                     <Linkedin className="h-4 w-4" />
                   </a>
                   <a
                     href={member.social.instagram}
-                    className="p-2 bg-white rounded-full hover:bg-primary hover:text-white shadow-md transition-colors duration-300 border border-primary/10"
+                    className="p-2.5 bg-background rounded-full hover:bg-primary hover:text-white text-primary shadow-lg hover:shadow-primary/50 transition-all duration-300 border border-border"
                     aria-label={`${member.name} Instagram`}
                   >
                     <Instagram className="h-4 w-4" />
@@ -87,11 +87,11 @@ const Team = () => {
               </div>
 
               {/* Member Info */}
-              <div className="w-full flex flex-col items-center text-center">
+              <div className="w-full flex flex-col items-center text-center mt-2">
                 <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                   {member.name}
                 </h3>
-                <p className="text-primary/80 font-semibold text-sm uppercase tracking-wide mb-3">
+                <p className="text-primary/90 font-semibold text-sm uppercase tracking-wider mb-4 px-3 py-1 bg-primary/10 rounded-full">
                   {member.role}
                 </p>
                 <p className="text-muted-foreground text-sm leading-relaxed">

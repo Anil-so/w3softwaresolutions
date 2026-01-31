@@ -34,31 +34,40 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-20 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="py-20 sm:py-28 bg-background relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent pointer-events-none"></div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/20 px-4 py-2 rounded-full mb-6 border border-primary/10">
+            <Send className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Get in Touch</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6 tracking-tight">
             Let's Build Something{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
+            <span className="text-primary relative inline-block">
               Amazing
+              <svg className="absolute w-full h-3 -bottom-1 left-0 text-primary/20" viewBox="0 0 100 10" preserveAspectRatio="none">
+                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="3" fill="none" />
+              </svg>
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Ready to transform your ideas into reality? Get in touch with us
-            today and let's discuss your next project.
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Ready to transform your ideas into reality? We're here to help you bring your vision to life.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Contact Form */}
-          <Card className="bg-gradient-card shadow-medium animate-fade-in">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold flex items-center gap-3">
+          <Card className="bg-card/50 backdrop-blur-md border-border/50 shadow-strong animate-slide-in-left relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
+            <CardHeader className="pb-2 pt-8 px-8">
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
                 <MessageSquare className="h-6 w-6 text-primary" />
                 Send us a Message
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8">
               <form
                 className="space-y-6"
                 action="https://formsubmit.co/web3softwaresolutionsinfo@gmail.com"
@@ -69,111 +78,117 @@ const Contact = () => {
                 <input type="hidden" name="_captcha" value="false" />
                 <input
                   type="hidden"
-                  // name="_next"
                   value="https://w3softwaresolutions.com/thank-you"
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName" className="text-sm font-medium text-foreground/80">First Name</Label>
                     <Input
                       id="firstName"
                       name="firstName"
                       placeholder="John"
                       required
+                      className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName" className="text-sm font-medium text-foreground/80">Last Name</Label>
                     <Input
                       id="lastName"
                       name="lastName"
                       placeholder="Doe"
                       required
+                      className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">Email</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     placeholder="john@example.com"
+                    className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company" className="text-sm font-medium text-foreground/80">Company</Label>
                   <Input
                     id="company"
                     name="company"
                     placeholder="Your Company"
+                    className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="projectType">Project Type</Label>
+                  <Label htmlFor="projectType" className="text-sm font-medium text-foreground/80">Project Type</Label>
                   <Input
                     id="projectType"
                     name="projectType"
                     placeholder="Website, Mobile App, Custom Software..."
+                    className="bg-background/50 border-input/50 focus:border-primary/50 transition-colors h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
+                  <Label htmlFor="message" className="text-sm font-medium text-foreground/80">Message</Label>
                   <Textarea
                     id="message"
                     name="message"
                     placeholder="Tell us about your project..."
-                    className="min-h-[120px]"
+                    className="min-h-[140px] bg-background/50 border-input/50 focus:border-primary/50 transition-colors resize-none"
                     required
                   />
                 </div>
 
-                <Button variant="hero" size="lg" className="w-full group">
-                  Send Message
-                  <Send className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <Button variant="hero" size="lg" className="w-full h-12 text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 group relative overflow-hidden">
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    Send Message
+                    <Send className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </Button>
               </form>
             </CardContent>
           </Card>
 
           {/* Contact Information */}
-          <div className="space-y-8 animate-slide-in-right">
+          <div className="space-y-8 animate-slide-in-right lg:pt-8">
             <div>
-              <h3 className="text-2xl font-semibold text-foreground mb-6">
+              <h3 className="text-2xl font-bold text-foreground mb-4">
                 Get in Touch
               </h3>
-              <p className="text-muted-foreground leading-relaxed mb-8">
+              <p className="text-muted-foreground leading-relaxed text-lg">
                 We'd love to hear about your project. Whether you have a
                 detailed brief or just an idea, we're here to help you bring it
                 to life.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {contactInfo.map((info, index) => (
                 <Card
                   key={info.title}
-                  className="group hover:shadow-medium transition-all duration-300 transform hover:scale-105 bg-gradient-card"
+                  className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card/60 backdrop-blur-sm border-border/50"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <CardContent className="p-6 ">
+                  <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 bg-primary-light rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                      <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shrink-0">
                         <info.icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-foreground mb-1">
+                        <h4 className="font-bold text-foreground mb-1 text-sm">
                           {info.title}
                         </h4>
-                        <p className="text-primary font-medium mb-1 text-[13px]">
+                        <p className="text-primary font-semibold mb-1 text-xs break-all">
                           {info.value}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {info.description}
                         </p>
                       </div>
@@ -184,9 +199,10 @@ const Contact = () => {
             </div>
 
             {/* CTA Section */}
-            <Card className="bg-gradient-primary text-primary-foreground shadow-glow">
-              <CardContent className="p-8 text-center">
-                <h4 className="text-xl font-semibold mb-3">
+            <Card className="bg-gradient-primary text-primary-foreground shadow-glow relative overflow-hidden border-0">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+              <CardContent className="p-8 text-center relative z-10">
+                <h4 className="text-xl font-bold mb-3">
                   Ready to Start Your Project?
                 </h4>
                 <p className="text-primary-foreground/90 mb-6">
@@ -196,10 +212,11 @@ const Contact = () => {
                   href="https://tidycal.com/chilkniyo/project-discussion"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="inline-block"
                 >
                   <Button
                     variant="outline"
-                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                    className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-md px-8 h-12"
                   >
                     Schedule Free Consultation
                   </Button>
