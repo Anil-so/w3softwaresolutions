@@ -8,8 +8,8 @@ const teamMembers = [
     image: "/assets/vikash.jpg",
     description: "Co-founder and full-stack developer with deep expertise in React, Node.js, and cloud solutions. Leads the team in delivering innovative and scalable digital products.",
     social: {
-      linkedin: "#",
-      instagram: "#"
+      linkedin: "https://www.linkedin.com/in/vikash-khadoliya-584660292?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
+      instagram: "https://www.instagram.com/the___.vikash?igsh=MTk1OWdvOG9vazJsMA%3D%3D&utm_source=qr"
     }
   },
   {
