@@ -56,45 +56,45 @@ const Team = () => {
           {teamMembers.map((member, index) => (
             <div
               key={member.id}
-              className="group bg-gradient-to-br from-white/90 to-secondary/40 rounded-3xl border border-border shadow-lg hover:shadow-2xl transition-all duration-500 relative flex flex-col items-center p-6 animate-float"
+              className="group h-full bg-gradient-to-br from-white/95 to-secondary/20 rounded-3xl border border-primary/10 shadow-md hover:shadow-xl transition-all duration-500 relative flex flex-col items-center p-8 gap-6 animate-float"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
               {/* Member Photo */}
-              <div className="relative mb-4">
+              <div className="relative">
                 <img
                   src={member.image}
                   alt={member.name}
-                  className="w-32 h-32 object-cover object-top rounded-full border-4 border-primary shadow-xl group-hover:scale-105 transition-transform duration-500 bg-white"
-                  style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}
+                  className="w-32 h-32 object-cover object-top rounded-full border-4 border-primary/20 group-hover:border-primary shadow-lg group-hover:scale-105 transition-all duration-500 bg-white"
+                  style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)' }}
                 />
                 {/* Social Links - appear on hover, floating above image */}
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-500">
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-500 z-10">
                   <a
                     href={member.social.linkedin}
-                    className="p-2 bg-white/90 rounded-full hover:bg-primary hover:text-white shadow transition-colors duration-300 border border-primary/20"
+                    className="p-2 bg-white rounded-full hover:bg-primary hover:text-white shadow-md transition-colors duration-300 border border-primary/10"
                     aria-label={`${member.name} LinkedIn`}
                   >
-                    <Linkedin className="h-5 w-5" />
+                    <Linkedin className="h-4 w-4" />
                   </a>
                   <a
                     href={member.social.instagram}
-                    className="p-2 bg-white/90 rounded-full hover:bg-primary hover:text-white shadow transition-colors duration-300 border border-primary/20"
+                    className="p-2 bg-white rounded-full hover:bg-primary hover:text-white shadow-md transition-colors duration-300 border border-primary/10"
                     aria-label={`${member.name} Instagram`}
                   >
-                    <Instagram className="h-5 w-5" />
+                    <Instagram className="h-4 w-4" />
                   </a>
                 </div>
               </div>
 
               {/* Member Info */}
-              <div className="flex-1 flex flex-col items-center text-center mt-2">
-                <h3 className="text-xl font-bold text-foreground mb-1">
+              <div className="w-full flex flex-col items-center text-center">
+                <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                   {member.name}
                 </h3>
-                <p className="text-primary font-medium mb-2">
+                <p className="text-primary/80 font-semibold text-sm uppercase tracking-wide mb-3">
                   {member.role}
                 </p>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-2">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {member.description}
                 </p>
               </div>
