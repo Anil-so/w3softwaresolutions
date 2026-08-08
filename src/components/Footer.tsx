@@ -42,112 +42,114 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-foreground text-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div className="lg:col-span-2">
-              <div className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
+    <footer className="bg-[#0B0F19] text-white relative overflow-hidden pt-16 sm:pt-20 border-t border-white/5 dark:border-border">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-40 h-40 bg-secondary rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-16">
+          {/* Company Info */}
+          <div className="lg:col-span-2 space-y-6">
+            <Link to="/" className="inline-block">
+              <span className="text-2xl font-bold bg-gradient-to-r from-white via-white/80 to-white/60 bg-clip-text text-transparent">
                 W3 Software Solutions
-              </div>
-              <p className="text-gray-300 mb-6 leading-relaxed max-w-md">
-                Transforming ideas into powerful digital solutions. We create
-                websites and applications that drive business growth and deliver
-                exceptional user experiences.
-              </p>
-              <div className="flex gap-4">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={social.label}
+              </span>
+            </Link>
+            <p className="text-gray-400 leading-relaxed max-w-md text-lg">
+              Transforming ideas into powerful digital solutions. We create
+              websites and applications that drive business growth and deliver
+              exceptional user experiences.
+            </p>
+            <div className="flex gap-4 pt-2">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="group"
+                >
+                  <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+                    <social.icon className="h-5 w-5 text-white/70 group-hover:text-white transition-colors" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-bold text-white tracking-wide">
+              Quick Links
+            </h3>
+            <ul className="space-y-4">
+              {quickLinks.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
+                    className="text-muted/60 hover:text-primary transition-colors duration-300 flex items-center gap-2 group"
                   >
-                    <Button
-                      key={social.label}
-                      variant="ghost"
-                      size="icon"
-                      className="text-gray-300 hover:text-white hover:bg-white/10"
-                      aria-label={social.label}
-                    >
-                      <social.icon className="h-5 w-5" />
-                    </Button>
-                  </a>
-                ))}
-              </div>
-            </div>
+                    <span className="h-px w-0 bg-primary group-hover:w-4 transition-all duration-300"></span>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Quick Links
-              </h3>
-              <ul className="space-y-3">
-                {quickLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      to={link.href}
-                      className="text-gray-300 hover:text-white transition-colors duration-300"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Services */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Services
-              </h3>
-              <ul className="space-y-3">
-                {services.map((service) => (
-                  <li key={service.name}>
-                    <Link 
-                      to={service.href} 
-                      className="text-gray-300 hover:text-white transition-colors duration-300"
-                    >
-                      {service.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Services */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-bold text-white tracking-wide">
+              Services
+            </h3>
+            <ul className="space-y-4">
+              {services.map((service) => (
+                <li key={service.name}>
+                  <Link
+                    to={service.href}
+                    className="text-muted/60 hover:text-primary transition-colors duration-300 flex items-center gap-2 group"
+                  >
+                    <span className="h-px w-0 bg-primary group-hover:w-4 transition-all duration-300"></span>
+                    {service.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-600 py-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-gray-300 text-sm">
-              © 2024 W3 Software Solutions. All rights reserved.
+        <div className="border-t border-white/10 py-8 mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div className="text-muted/40 text-sm">
+              © {new Date().getFullYear()} W3 Software Solutions. All rights reserved.
             </div>
 
             <div className="flex items-center gap-6">
-              <a
-                href="/privacy-policy"
-                className="text-gray-300 hover:text-white text-sm transition-colors duration-300"
+              <Link
+                to="/privacy-policy"
+                className="text-muted/40 hover:text-white text-sm transition-colors duration-300"
               >
                 Privacy Policy
-              </a>
-              <a
-                href="/terms-of-service"
-                className="text-gray-300 hover:text-white text-sm transition-colors duration-300"
+              </Link>
+              <Link
+                to="/terms-of-service"
+                className="text-muted/40 hover:text-white text-sm transition-colors duration-300"
               >
                 Terms of Service
-              </a>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={scrollToTop}
-                className="text-gray-300 hover:text-white hover:bg-white/10 group"
+                className="text-muted/60 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 rounded-full px-4"
               >
                 Back to Top
-                <ArrowUp className="ml-2 h-4 w-4 group-hover:-translate-y-1 transition-transform" />
+                <ArrowUp className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>

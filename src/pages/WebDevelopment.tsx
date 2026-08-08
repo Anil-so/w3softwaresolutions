@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Globe, 
-  ArrowRight, 
-  CheckCircle, 
+import {
+  Globe,
+  ArrowRight,
+  CheckCircle,
   Star,
   Clock,
   Users,
@@ -14,13 +14,12 @@ import {
   TrendingUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+
 
 const WebDevelopment = () => {
   const features = [
     "React & Next.js Development",
-    "Responsive & Mobile-First Design", 
+    "Responsive & Mobile-First Design",
     "SEO Optimization & Performance",
     "Progressive Web Apps (PWA)",
     "E-commerce Solutions",
@@ -48,7 +47,7 @@ const WebDevelopment = () => {
       popular: false
     },
     {
-      name: "Professional Website", 
+      name: "Professional Website",
       price: "$5,999",
       duration: "4-6 weeks",
       description: "Ideal for growing businesses with advanced needs",
@@ -66,7 +65,7 @@ const WebDevelopment = () => {
     {
       name: "Enterprise Solution",
       price: "$12,999+",
-      duration: "8-12 weeks", 
+      duration: "8-12 weeks",
       description: "Custom web applications for large organizations",
       features: [
         "Unlimited pages",
@@ -113,10 +112,9 @@ const WebDevelopment = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
       {/* Hero Section */}
-      <section className="pt-20 pb-16 bg-gradient-to-br from-blue-500/10 via-background to-cyan-500/5 relative overflow-hidden">
+      <section className="pt-32 pb-20 bg-gradient-to-br from-blue-500/10 via-background to-cyan-500/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 animate-fade-in">
@@ -128,10 +126,10 @@ const WebDevelopment = () => {
               Modern <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Web Solutions</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-8">
-              We build fast, secure, and scalable web applications that drive business growth. 
+              We build fast, secure, and scalable web applications that drive business growth.
               From simple websites to complex web applications, we bring your vision to life.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button variant="default" size="lg" className="animate-glow">
                 Start Your Project
@@ -151,7 +149,7 @@ const WebDevelopment = () => {
                 { label: "Average Speed", value: "1.2s", icon: Zap },
                 { label: "Uptime", value: "99.9%", icon: Shield }
               ].map((stat, index) => (
-                <div 
+                <div
                   key={stat.label}
                   className="text-center p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
@@ -180,7 +178,7 @@ const WebDevelopment = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-16">
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={feature}
                 className="flex items-center gap-2 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all duration-300 animate-slide-in-right"
                 style={{ animationDelay: `${index * 0.05}s` }}
@@ -194,11 +192,10 @@ const WebDevelopment = () => {
           {/* Pricing Packages */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {packages.map((pkg, index) => (
-              <Card 
+              <Card
                 key={pkg.name}
-                className={`relative overflow-hidden transition-all duration-500 transform hover:scale-105 animate-slide-in-right ${
-                  pkg.popular ? 'border-blue-500 shadow-elegant' : 'border-border/50'
-                }`}
+                className={`relative overflow-hidden transition-all duration-500 transform hover:scale-105 animate-slide-in-right ${pkg.popular ? 'border-blue-500 shadow-elegant' : 'border-border/50'
+                  }`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {pkg.popular && (
@@ -206,7 +203,7 @@ const WebDevelopment = () => {
                     Most Popular
                   </div>
                 )}
-                
+
                 <CardHeader className={pkg.popular ? 'pt-12' : 'pt-6'}>
                   <div className="text-center">
                     <CardTitle className="text-xl font-bold text-foreground mb-2">{pkg.name}</CardTitle>
@@ -218,7 +215,7 @@ const WebDevelopment = () => {
                     <p className="text-muted-foreground text-sm">{pkg.description}</p>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent>
                   <ul className="space-y-3 mb-6">
                     {pkg.features.map((feature) => (
@@ -228,9 +225,9 @@ const WebDevelopment = () => {
                       </li>
                     ))}
                   </ul>
-                  
-                  <Button 
-                    variant={pkg.popular ? "default" : "outline"} 
+
+                  <Button
+                    variant={pkg.popular ? "default" : "outline"}
                     className="w-full group"
                   >
                     Get Started
@@ -252,10 +249,10 @@ const WebDevelopment = () => {
             </h3>
             <p className="text-muted-foreground">Modern tools that power exceptional web experiences</p>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {technologies.map((tech, index) => (
-              <div 
+              <div
                 key={tech.name}
                 className="text-center p-6 bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 hover:border-blue-500/50 hover:shadow-elegant transition-all duration-300 group animate-scale-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -280,10 +277,10 @@ const WebDevelopment = () => {
             </h3>
             <p className="text-muted-foreground">Examples of our web development work</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {portfolio.map((project, index) => (
-              <Card 
+              <Card
                 key={project.title}
                 className="group overflow-hidden border-0 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm hover:shadow-elegant transition-all duration-500 transform hover:scale-105 animate-slide-in-right"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -295,7 +292,7 @@ const WebDevelopment = () => {
                   </CardTitle>
                   <p className="text-muted-foreground">{project.description}</p>
                 </CardHeader>
-                
+
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {project.tech.map((tech) => (
@@ -304,7 +301,7 @@ const WebDevelopment = () => {
                       </Badge>
                     ))}
                   </div>
-                  
+
                   <Button variant="outline" className="w-full group">
                     View Project
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -324,7 +321,7 @@ const WebDevelopment = () => {
               Ready to Build Your Website?
             </h3>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Let's discuss your web development needs and create something amazing together. 
+              Let's discuss your web development needs and create something amazing together.
               Get a free consultation and project quote today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -343,7 +340,6 @@ const WebDevelopment = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

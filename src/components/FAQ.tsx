@@ -52,7 +52,7 @@ const faqs = [
 
 const FAQ = () => {
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-16 sm:py-20 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -66,14 +66,14 @@ const FAQ = () => {
 
         <div className="max-w-4xl mx-auto">
           {/* FAQ Accordion */}
-          <Card className="mb-12 bg-white/80 backdrop-blur-sm border-primary/10">
+          <Card className="mb-12 bg-card/60 dark:bg-card/40 backdrop-blur-md border-primary/10">
             <CardContent className="p-6">
               <Accordion type="single" collapsible className="space-y-4">
                 {faqs.map((faq, index) => (
-                  <AccordionItem 
-                    key={index} 
+                  <AccordionItem
+                    key={index}
                     value={`item-${index}`}
-                    className="border border-primary/10 rounded-lg px-4 bg-gradient-to-r from-white to-primary/5"
+                    className="border border-primary/10 rounded-lg px-4 bg-gradient-to-r from-background/50 to-primary/5 dark:from-background/30 dark:to-primary/10"
                   >
                     <AccordionTrigger className="text-left hover:no-underline py-4">
                       <span className="font-semibold text-foreground pr-4">

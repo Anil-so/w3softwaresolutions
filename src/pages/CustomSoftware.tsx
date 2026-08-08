@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Code, 
-  ArrowRight, 
-  CheckCircle, 
+import {
+  Code,
+  ArrowRight,
+  CheckCircle,
   Star,
   Clock,
   Users,
@@ -14,8 +14,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+
 
 const CustomSoftware = () => {
   const features = [
@@ -48,7 +47,7 @@ const CustomSoftware = () => {
       popular: false
     },
     {
-      name: "Professional System", 
+      name: "Professional System",
       price: "$15,999",
       duration: "10-16 weeks",
       description: "Advanced software for growing companies",
@@ -66,7 +65,7 @@ const CustomSoftware = () => {
     {
       name: "Enterprise Platform",
       price: "$35,999+",
-      duration: "16-24 weeks", 
+      duration: "16-24 weeks",
       description: "Large-scale systems for enterprises",
       features: [
         "Microservices architecture",
@@ -113,10 +112,9 @@ const CustomSoftware = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
       {/* Hero Section */}
-      <section className="pt-20 pb-16 bg-gradient-to-br from-green-500/10 via-background to-emerald-500/5 relative overflow-hidden">
+      <section className="pt-32 pb-20 bg-gradient-to-br from-green-500/10 via-background to-emerald-500/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 animate-fade-in">
@@ -128,10 +126,10 @@ const CustomSoftware = () => {
               Tailored <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">Software Solutions</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-8">
-              We build custom software solutions that perfectly fit your business needs. 
+              We build custom software solutions that perfectly fit your business needs.
               From automation tools to complex enterprise systems, we create software that grows with you.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button variant="default" size="lg" className="animate-glow">
                 Start Your Software
@@ -151,7 +149,7 @@ const CustomSoftware = () => {
                 { label: "Time Saved", value: "80%", icon: Zap },
                 { label: "ROI Increase", value: "300%", icon: TrendingUp }
               ].map((stat, index) => (
-                <div 
+                <div
                   key={stat.label}
                   className="text-center p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
@@ -180,7 +178,7 @@ const CustomSoftware = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-16">
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={feature}
                 className="flex items-center gap-2 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-green-500/50 hover:bg-green-500/5 transition-all duration-300 animate-slide-in-right"
                 style={{ animationDelay: `${index * 0.05}s` }}
@@ -194,11 +192,10 @@ const CustomSoftware = () => {
           {/* Pricing Packages */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {packages.map((pkg, index) => (
-              <Card 
+              <Card
                 key={pkg.name}
-                className={`relative overflow-hidden transition-all duration-500 transform hover:scale-105 animate-slide-in-right ${
-                  pkg.popular ? 'border-green-500 shadow-elegant' : 'border-border/50'
-                }`}
+                className={`relative overflow-hidden transition-all duration-500 transform hover:scale-105 animate-slide-in-right ${pkg.popular ? 'border-green-500 shadow-elegant' : 'border-border/50'
+                  }`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {pkg.popular && (
@@ -206,7 +203,7 @@ const CustomSoftware = () => {
                     Most Popular
                   </div>
                 )}
-                
+
                 <CardHeader className={pkg.popular ? 'pt-12' : 'pt-6'}>
                   <div className="text-center">
                     <CardTitle className="text-xl font-bold text-foreground mb-2">{pkg.name}</CardTitle>
@@ -218,7 +215,7 @@ const CustomSoftware = () => {
                     <p className="text-muted-foreground text-sm">{pkg.description}</p>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent>
                   <ul className="space-y-3 mb-6">
                     {pkg.features.map((feature) => (
@@ -228,9 +225,9 @@ const CustomSoftware = () => {
                       </li>
                     ))}
                   </ul>
-                  
-                  <Button 
-                    variant={pkg.popular ? "default" : "outline"} 
+
+                  <Button
+                    variant={pkg.popular ? "default" : "outline"}
                     className="w-full group"
                   >
                     Get Started
@@ -252,10 +249,10 @@ const CustomSoftware = () => {
             </h3>
             <p className="text-muted-foreground">Powerful tools that create robust software solutions</p>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {technologies.map((tech, index) => (
-              <div 
+              <div
                 key={tech.name}
                 className="text-center p-6 bg-background/80 backdrop-blur-sm rounded-2xl border border-border/50 hover:border-green-500/50 hover:shadow-elegant transition-all duration-300 group animate-scale-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -280,10 +277,10 @@ const CustomSoftware = () => {
             </h3>
             <p className="text-muted-foreground">Examples of our custom software solutions</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {portfolio.map((project, index) => (
-              <Card 
+              <Card
                 key={project.title}
                 className="group overflow-hidden border-0 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm hover:shadow-elegant transition-all duration-500 transform hover:scale-105 animate-slide-in-right"
                 style={{ animationDelay: `${index * 0.1}s` }}
@@ -295,7 +292,7 @@ const CustomSoftware = () => {
                   </CardTitle>
                   <p className="text-muted-foreground">{project.description}</p>
                 </CardHeader>
-                
+
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {project.tech.map((tech) => (
@@ -304,7 +301,7 @@ const CustomSoftware = () => {
                       </Badge>
                     ))}
                   </div>
-                  
+
                   <Button variant="outline" className="w-full group">
                     View Case Study
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -324,7 +321,7 @@ const CustomSoftware = () => {
               Ready to Build Custom Software?
             </h3>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Let's discuss your unique requirements and create a software solution that transforms your business. 
+              Let's discuss your unique requirements and create a software solution that transforms your business.
               Get a free consultation and detailed proposal today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -343,7 +340,6 @@ const CustomSoftware = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

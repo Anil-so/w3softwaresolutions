@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Code, 
-  Smartphone, 
-  Globe, 
-  Database, 
-  Paintbrush, 
+import {
+  Code,
+  Smartphone,
+  Globe,
+  Database,
+  Paintbrush,
   Rocket,
   ArrowRight,
   Zap,
@@ -27,7 +27,7 @@ const OurWork = () => {
       longDescription: "We specialize in creating high-performance web applications using React, Next.js, and modern frontend frameworks. Our websites are not just visually appealing but also optimized for search engines, fast loading times, and seamless user experiences across all devices.",
       features: [
         "React & Next.js Development",
-        "Responsive & Mobile-First Design", 
+        "Responsive & Mobile-First Design",
         "SEO Optimization & Performance",
         "Progressive Web Apps (PWA)",
         "E-commerce Solutions",
@@ -140,7 +140,7 @@ const OurWork = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-accent/5 relative overflow-hidden">
+      <section className="pt-32 pb-20 bg-gradient-to-br from-primary/10 via-background to-accent/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16 animate-fade-in">
@@ -152,14 +152,14 @@ const OurWork = () => {
               What We <span className="bg-gradient-primary bg-clip-text text-transparent">Build</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-8">
-              From innovative web applications to scalable mobile solutions, we craft digital experiences 
+              From innovative web applications to scalable mobile solutions, we craft digital experiences
               that transform ideas into successful businesses and drive meaningful growth.
             </p>
-            
+
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               {stats.map((stat, index) => (
-                <div 
+                <div
                   key={stat.label}
                   className="text-center p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
@@ -179,13 +179,13 @@ const OurWork = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {services.map((service, index) => (
-              <Card 
-                key={service.title} 
+              <Card
+                key={service.title}
                 className="group relative overflow-hidden border-0 bg-gradient-to-br from-background to-background/50 backdrop-blur-sm hover:shadow-elegant transition-all duration-500 transform hover:scale-[1.02] animate-slide-in-right"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                
+
                 <CardHeader className="relative pb-4">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
@@ -211,16 +211,16 @@ const OurWork = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     {service.description}
                   </p>
-                  
+
                   <p className="text-sm text-muted-foreground/80 leading-relaxed">
                     {service.longDescription}
                   </p>
                 </CardHeader>
-                
+
                 <CardContent className="relative pt-0">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
                     {service.features.map((feature, idx) => (

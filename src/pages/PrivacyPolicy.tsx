@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="mb-8">
           <Link to="/">
             <Button variant="ghost" className="mb-4">
@@ -27,15 +27,15 @@ const PrivacyPolicy = () => {
               <div>
                 <h3 className="font-semibold mb-2">Personal Information</h3>
                 <p className="text-muted-foreground">
-                  We collect information you provide directly to us, such as when you create an account, 
-                  fill out a form, or contact us. This may include your name, email address, phone number, 
+                  We collect information you provide directly to us, such as when you create an account,
+                  fill out a form, or contact us. This may include your name, email address, phone number,
                   and company information.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Usage Information</h3>
                 <p className="text-muted-foreground">
-                  We automatically collect certain information about your device and usage of our services, 
+                  We automatically collect certain information about your device and usage of our services,
                   including IP address, browser type, operating system, and pages visited.
                 </p>
               </div>
@@ -63,8 +63,8 @@ const PrivacyPolicy = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We do not sell, trade, or otherwise transfer your personal information to third parties 
-                without your consent, except as described in this policy. We may share information with 
+                We do not sell, trade, or otherwise transfer your personal information to third parties
+                without your consent, except as described in this policy. We may share information with
                 trusted service providers who assist us in operating our website and conducting our business.
               </p>
             </CardContent>
@@ -76,8 +76,8 @@ const PrivacyPolicy = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We implement appropriate security measures to protect your personal information against 
-                unauthorized access, alteration, disclosure, or destruction. However, no method of 
+                We implement appropriate security measures to protect your personal information against
+                unauthorized access, alteration, disclosure, or destruction. However, no method of
                 transmission over the internet is 100% secure.
               </p>
             </CardContent>
