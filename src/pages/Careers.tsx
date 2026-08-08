@@ -355,41 +355,28 @@ const Careers = () => {
               Back to Home
             </Button>
           </Link>
-<<<<<<< HEAD
-          <h1 className="mb-4 text-4xl font-bold text-foreground">Join Our Team</h1>
-          <p className="max-w-2xl text-xl text-muted-foreground">
-            We are expanding our team across India and welcome talented candidates who want to grow with W3 Software Solutions.
-=======
           <h1 className="text-4xl font-bold text-foreground mb-4">Join Our Team</h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
             Be part of a dynamic team that's shaping the future of software development.
             We're always looking for talented individuals who share our passion for innovation.
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
           </p>
         </div>
 
-        <div className="mb-12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Why Work With Us?
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Why Work With Us?
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
                 <div>
-<<<<<<< HEAD
-                  <h3 className="mb-3 font-semibold">Our Culture</h3>
-                  <p className="mb-4 text-muted-foreground">
-                    We build with care, communicate clearly, and value people who enjoy solving real problems with modern tools.
-=======
                   <h3 className="font-semibold mb-3">Our Culture</h3>
                   <p className="text-muted-foreground mb-4">
                     We foster a collaborative environment where creativity thrives and innovation
                     is encouraged. Our team values work-life balance, continuous learning, and
                     delivering exceptional results for our clients.
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
                   </p>
                 </div>
                 <div>
@@ -769,14 +756,9 @@ const Careers = () => {
             <CardTitle>Don't See the Right Position?</CardTitle>
           </CardHeader>
           <CardContent>
-<<<<<<< HEAD
-            <p className="mb-4 text-muted-foreground">
-              We are always interested in meeting talented individuals. Send us your resume and tell us about your skills and interests.
-=======
             <p className="text-muted-foreground mb-4">
               We're always interested in meeting talented individuals. Send us your resume and
               tell us about your skills and interests.
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
             </p>
             <Button>
               <Mail className="mr-2 h-4 w-4" />

@@ -1,23 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  Code, 
-  Smartphone, 
-  Globe, 
-  Database, 
-  Paintbrush, 
-=======
-import { useNavigate } from "react-router-dom";
 import {
   Code,
   Smartphone,
   Globe,
   Database,
   Paintbrush,
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
   Rocket,
   ArrowRight,
   Zap,
@@ -167,7 +157,6 @@ const Services = () => {
 
           <div className="text-center mt-16 sm:mt-24">
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-<<<<<<< HEAD
               <Button variant="hero" size="lg" className="animate-glow" asChild>
                 <Link to="/#contact">Start Your Project</Link>
               </Button>
@@ -176,14 +165,6 @@ const Services = () => {
                   View Portfolio
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-=======
-              <Button variant="hero" size="lg" className="shadow-lg shadow-primary/25 hover:shadow-primary/40 w-full sm:w-auto h-12 px-8">
-                Start Your Project
-              </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 group bg-background/50 backdrop-blur-sm">
-                View Portfolio
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
               </Button>
             </div>
           </div>

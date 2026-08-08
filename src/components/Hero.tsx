@@ -46,17 +46,11 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-<<<<<<< HEAD
             <Button variant="premium" size="lg" className="group" asChild>
               <Link to="/#contact">
                 Start Your Project
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-=======
-            <Button variant="premium" size="lg" className="w-full sm:w-auto h-12 px-8 text-lg font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-all duration-300 group">
-              Start Your Project
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
             </Button>
             <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-lg border-primary/20 hover:bg-primary/5 hover:text-primary hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-all duration-300 backdrop-blur-sm bg-background/30" asChild>
               <Link to="/our-work">View Our Work</Link>

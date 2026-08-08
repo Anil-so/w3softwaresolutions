@@ -10,8 +10,6 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-<<<<<<< HEAD
-=======
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -38,7 +36,6 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Our Work", href: "/our-work" },

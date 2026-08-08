@@ -3,13 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-=======
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
->>>>>>> 4b3916bf9f528dd0584c8af32ea25d42586d12ac
 import Index from "./pages/Index";
 import OurWork from "./pages/OurWork";
 import WebDevelopment from "./pages/WebDevelopment";
