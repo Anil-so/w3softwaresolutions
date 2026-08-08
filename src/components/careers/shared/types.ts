@@ -1,0 +1,22 @@
+export type ApplicantFormData = {
+  fullName: string;
+  email: string;
+  mobile: string;
+  dateOfBirth: string;
+  gender: string;
+  country: string;
+  state: string;
+  city: string;
+  postalCode: string;
+  address: string;
+  qualification: string;
+  college: string;
+  university: string;
+  percentage: string;
+  passingYear: string;
+  experience: string;
+  skills: string;
+  portfolio: string;
+  linkedIn: string;
+  declarationAccepted: boolean;
+};

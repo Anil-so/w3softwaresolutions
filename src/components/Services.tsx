@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Code, 
   Smartphone, 
@@ -155,12 +155,14 @@ const Services = () => {
 
           <div className="text-center mt-16 animate-bounce-in" style={{ animationDelay: '0.8s' }}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button variant="hero" size="lg" className="animate-glow">
-                Start Your Project
+              <Button variant="hero" size="lg" className="animate-glow" asChild>
+                <Link to="/#contact">Start Your Project</Link>
               </Button>
-              <Button variant="outline" size="lg" className="group">
-                View Portfolio
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <Button variant="outline" size="lg" className="group" asChild>
+                <Link to="/our-work">
+                  View Portfolio
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </Button>
             </div>
           </div>

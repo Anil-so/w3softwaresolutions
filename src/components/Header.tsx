@@ -8,13 +8,13 @@ import logo from "@/assets/w3-logo.png";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-      const navItems = [
-        { name: "Home", href: "/" },
-        { name: "Our Work", href: "/our-work" },
-        { name: "About", href: "/#about" },
-        { name: "Contact", href: "/#contact" },
-        { name: "Careers", href: "/careers" },
-      ];
+  const navItems = [
+    { name: "Home", href: "/" },
+    { name: "Our Work", href: "/our-work" },
+    { name: "About", href: "/#about" },
+    { name: "Contact", href: "/#contact" },
+    { name: "Careers", href: "/careers" },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">

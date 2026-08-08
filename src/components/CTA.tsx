@@ -50,7 +50,7 @@ const CTA = () => {
             className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 text-lg group"
             asChild
           >
-            <Link to="/contact">
+            <Link to="/#contact">
               Get Free Consultation
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Link>
