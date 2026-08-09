@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,21 @@ import { RegistrationPayment } from "@/components/careers/payment/RegistrationPa
 import { PaymentSuccess } from "@/components/careers/payment/PaymentSuccess";
 import { ApplicantDashboard } from "@/components/careers/dashboard/ApplicantDashboard";
 import type { ApplicantFormData } from "@/components/careers/shared/types";
+import { supabase, sendEmailOtp, verifyEmailOtp } from "@/lib/supabase";
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
 
 type JobOpening = {
   id: number;
@@ -44,7 +59,52 @@ const Careers = () => {
   const [applicantEmail, setApplicantEmail] = useState("");
   const [applicationReference, setApplicationReference] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
   const applicationSectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          setApplicantEmail(session.user.email);
+          const { data: applicant } = await supabase
+            .from('applicants')
+            .select('id, application_number, payment_status, application_status')
+            .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
+            .maybeSingle();
+
+          if (applicant) {
+            setCurrentApplicantId(applicant.id);
+            setApplicationReference(applicant.application_number || '');
+            if (applicant.payment_status === 'verified') {
+              setApplicationStep('dashboard');
+            } else if (applicant.application_status === 'submitted') {
+              setApplicationStep('payment');
+            } else {
+              setApplicationStep('application');
+            }
+          } else {
+            setApplicationStep('application');
+          }
+        }
+      } catch (err) {
+        console.error('Session check error:', err);
+      }
+    }
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user?.email) {
+        setApplicantEmail(session.user.email);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const jobOpenings: JobOpening[] = [
     {
@@ -298,47 +358,252 @@ const Careers = () => {
     setApplicationJob(job);
     setSelectedJob(null);
     setApplicationStep("auth");
-    setApplicantEmail("");
-    setApplicationReference("");
     setFeedbackMessage("");
     setTimeout(() => {
       applicationSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 0);
   };
 
-  const handleContinueAuth = () => {
+  const handleContinueAuth = async () => {
     if (!applicantEmail.trim()) {
       setFeedbackMessage("Please enter your email address to continue.");
       return;
     }
     setFeedbackMessage("");
-    setApplicationStep("otp");
-  };
-
-  const handleVerifyOtp = (otpValue: string) => {
-    if (otpValue === "123456") {
-      setFeedbackMessage("");
-      setApplicationStep("application");
-    } else {
-      setFeedbackMessage("Use the demo verification code 123456 to continue.");
+    setIsLoading(true);
+    try {
+      await sendEmailOtp(applicantEmail.trim().toLowerCase());
+      setFeedbackMessage(`Verification OTP sent to ${applicantEmail}. Please check your inbox.`);
+      setApplicationStep("otp");
+    } catch (err: any) {
+      console.error("Auth OTP send error:", err);
+      setFeedbackMessage(err.message || "Failed to send verification email OTP.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleResendOtp = () => {
-    setFeedbackMessage("A fresh verification code has been prepared. Use 123456.");
-  };
-
-  const handleApplicationSubmit = (data: ApplicantFormData) => {
-    setFeedbackMessage("Your application details are ready for review.");
-    setApplicationStep("payment");
-    void data;
-  };
-
-  const handleMakePayment = () => {
-    const newId = `W3-${Math.floor(1000 + Math.random() * 9000)}`;
-    setApplicationReference(newId);
-    setApplicationStep("success");
+  const handleVerifyOtp = async (otpValue: string) => {
     setFeedbackMessage("");
+    setIsLoading(true);
+    try {
+      const data = await verifyEmailOtp(applicantEmail.trim().toLowerCase(), otpValue);
+      const user = data?.user || data?.session?.user;
+      if (user) {
+        setFeedbackMessage("Email verified successfully!");
+        const { data: applicant } = await supabase
+          .from("applicants")
+          .select("id, application_number, payment_status, application_status")
+          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+          .maybeSingle();
+
+        if (applicant) {
+          setCurrentApplicantId(applicant.id);
+          setApplicationReference(applicant.application_number || "");
+          if (applicant.payment_status === "verified") {
+            setApplicationStep("dashboard");
+          } else if (applicant.application_status === "submitted") {
+            setApplicationStep("payment");
+          } else {
+            setApplicationStep("application");
+          }
+        } else {
+          const { data: newApplicant } = await supabase
+            .from("applicants")
+            .upsert(
+              [
+                {
+                  user_id: user.id,
+                  email: user.email,
+                  full_name: "",
+                  mobile: "",
+                  email_verified: true,
+                },
+              ],
+              { onConflict: "email" }
+            )
+            .select("id, application_number")
+            .maybeSingle();
+
+          if (newApplicant) {
+            setCurrentApplicantId(newApplicant.id);
+            setApplicationReference(newApplicant.application_number || "");
+          }
+          setApplicationStep("application");
+        }
+      }
+    } catch (err: any) {
+      console.error("OTP verification error:", err);
+      setFeedbackMessage(err.message || "Invalid or expired verification code.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setIsLoading(true);
+    try {
+      await sendEmailOtp(applicantEmail.trim().toLowerCase());
+      setFeedbackMessage(`A fresh verification code was sent to ${applicantEmail}.`);
+    } catch (err: any) {
+      setFeedbackMessage(err.message || "Failed to resend code.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApplicationSubmit = async (data: ApplicantFormData) => {
+    setIsLoading(true);
+    setFeedbackMessage("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      const userEmail = session?.user?.email || applicantEmail;
+
+      const payload = {
+        user_id: userId,
+        full_name: data.fullName,
+        email: userEmail,
+        mobile: data.mobile,
+        dob: data.dateOfBirth || null,
+        gender: data.gender,
+        country: data.country,
+        state: data.state,
+        city: data.city,
+        postal_code: data.postalCode,
+        address: data.address,
+        qualification: data.qualification,
+        college: data.college,
+        university: data.university,
+        percentage: data.percentage,
+        passing_year: data.passingYear,
+        experience: data.experience,
+        skills: data.skills,
+        portfolio: data.portfolio,
+        linkedin: data.linkedIn,
+        email_verified: true,
+        profile_completion_percent: 85,
+        application_status: "submitted",
+      };
+
+      const { data: updatedApplicant, error } = await supabase
+        .from("applicants")
+        .upsert([payload], { onConflict: "email" })
+        .select("id, application_number")
+        .single();
+
+      if (error) {
+        console.error("Application submit DB error:", error);
+        throw error;
+      }
+
+      if (updatedApplicant) {
+        setCurrentApplicantId(updatedApplicant.id);
+        setApplicationReference(updatedApplicant.application_number || "");
+      }
+
+      setFeedbackMessage("Application submitted! Please proceed to complete registration payment.");
+      setApplicationStep("payment");
+    } catch (err: any) {
+      console.error("Application submit error:", err);
+      setFeedbackMessage(err.message || "Failed to save application details.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMakePayment = async () => {
+    setIsLoading(true);
+    setFeedbackMessage("");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setFeedbackMessage("Session expired. Please sign in with your email.");
+        setApplicationStep("auth");
+        return;
+      }
+
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error("Razorpay SDK script failed to load. Please check your internet connection.");
+      }
+
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      const createOrderRes = await fetch(`${backendUrl}/api/payments/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          applicant_id: currentApplicantId,
+        }),
+      });
+
+      const orderData = await createOrderRes.json();
+      if (!createOrderRes.ok || !orderData.success) {
+        throw new Error(orderData.message || "Failed to create Razorpay order on server.");
+      }
+
+      const options = {
+        key: orderData.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "W3 Solution Craft",
+        description: "Application Registration Fee",
+        order_id: orderData.orderId,
+        handler: async (response: any) => {
+          setIsLoading(true);
+          try {
+            const verifyRes = await fetch(`${backendUrl}/api/payments/verify`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                applicant_id: currentApplicantId,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success) {
+              throw new Error(verifyData.message || "Payment signature verification failed.");
+            }
+
+            setApplicationStep("success");
+            setFeedbackMessage("");
+          } catch (vErr: any) {
+            console.error("Payment verify error:", vErr);
+            setFeedbackMessage(vErr.message || "Payment verification failed.");
+          } finally {
+            setIsLoading(false);
+          }
+        },
+        prefill: {
+          email: session.user.email,
+        },
+        theme: {
+          color: "#0f172a",
+        },
+      };
+
+      const razorpayWindow = new (window as any).Razorpay(options);
+      razorpayWindow.on("payment.failed", (failRes: any) => {
+        console.error("Razorpay payment failed:", failRes);
+        setFeedbackMessage(failRes.error?.description || "Payment failed or was cancelled.");
+        setIsLoading(false);
+      });
+      razorpayWindow.open();
+    } catch (err: any) {
+      console.error("Make payment error:", err);
+      setFeedbackMessage(err.message || "Failed to launch Razorpay checkout.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoToDashboard = () => {
@@ -393,7 +658,6 @@ const Careers = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
 
         <div className="mb-12">
           <Card>
@@ -547,6 +811,7 @@ const Careers = () => {
                       onEmailChange={setApplicantEmail}
                       onContinue={handleContinueAuth}
                       onBack={() => setApplicationStep("auth")}
+                      isLoading={isLoading}
                     />
                   )}
                   {applicationStep === "otp" && (
@@ -555,6 +820,7 @@ const Careers = () => {
                       onVerify={handleVerifyOtp}
                       onChangeEmail={() => setApplicationStep("auth")}
                       onResend={handleResendOtp}
+                      isLoading={isLoading}
                     />
                   )}
                   {applicationStep === "application" && (
@@ -582,12 +848,12 @@ const Careers = () => {
                     }} />
                   )}
                   {applicationStep === "payment" && (
-                    <RegistrationPayment onPay={handleMakePayment} onBack={() => setApplicationStep("application")} />
+                    <RegistrationPayment onPay={handleMakePayment} onBack={() => setApplicationStep("application")} isLoading={isLoading} />
                   )}
                   {applicationStep === "success" && (
                     <PaymentSuccess referenceNumber={applicationReference} onGoToDashboard={handleGoToDashboard} />
                   )}
-                  {applicationStep === "dashboard" && <ApplicantDashboard />}
+                  {applicationStep === "dashboard" && <ApplicantDashboard onLogout={() => { setApplicationStep("auth"); setApplicantEmail(""); setApplicationReference(""); }} />}
 
                   {feedbackMessage ? (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">

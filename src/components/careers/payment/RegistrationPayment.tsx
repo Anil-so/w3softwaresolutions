@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 type RegistrationPaymentProps = {
   onPay: () => void;
   onBack: () => void;
+  isLoading?: boolean;
 };
 
-export function RegistrationPayment({ onPay, onBack }: RegistrationPaymentProps) {
+export function RegistrationPayment({ onPay, onBack, isLoading = false }: RegistrationPaymentProps) {
   return (
     <Card className="border-slate-200 bg-white/90 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.35)]">
       <CardHeader className="space-y-3">
@@ -50,8 +51,8 @@ export function RegistrationPayment({ onPay, onBack }: RegistrationPaymentProps)
         <div className="text-sm leading-6 text-slate-500">
           This fee covers application processing and candidate verification. No payment guarantees employment or interview selection.
         </div>
-        <Button onClick={onPay} className="h-12 w-full rounded-2xl">
-          Pay with Razorpay
+        <Button onClick={onPay} className="h-12 w-full rounded-2xl" disabled={isLoading}>
+          {isLoading ? 'Processing Checkout...' : 'Pay with Razorpay'}
         </Button>
         <Button variant="ghost" onClick={onBack} className="h-11 w-full rounded-2xl text-slate-600">
           <ArrowLeft className="mr-2 h-4 w-4" />

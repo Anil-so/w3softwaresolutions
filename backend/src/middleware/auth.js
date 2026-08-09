@@ -1,26 +1,27 @@
-const jwt = require('jsonwebtoken');
+const { supabase } = require('../config/supabase');
 const { AppError } = require('../utils/appError');
 
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-
-  if (!token) {
-    return next(new AppError(401, 'Authentication token missing.'));
-  }
-
-  const jwtSecret = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'dev-jwt-secret-change-me');
-  if (!jwtSecret) {
-    return next(new AppError(500, 'JWT secret is not configured.'));
-  }
-
+async function authenticateToken(req, res, next) {
   try {
-    const decoded = jwt.verify(token, jwtSecret);
-    req.user = decoded;
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    if (!token) {
+      return next(new AppError(401, 'Authentication token missing.'));
+    }
+
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return next(new AppError(401, 'Invalid or expired Supabase authentication session.'));
+    }
+
+    req.user = user;
     next();
-  } catch (error) {
-    return next(new AppError(403, 'Invalid or expired token.'));
+  } catch (err) {
+    return next(new AppError(401, err.message || 'Authentication failed.'));
   }
 }
 
 module.exports = authenticateToken;
+

@@ -8,11 +8,12 @@ type OtpVerificationCardProps = {
   onVerify: (otp: string) => void;
   onChangeEmail: () => void;
   onResend: () => void;
+  isLoading?: boolean;
 };
 
 const otpLength = 6;
 
-export function OtpVerificationCard({ email, onVerify, onChangeEmail, onResend }: OtpVerificationCardProps) {
+export function OtpVerificationCard({ email, onVerify, onChangeEmail, onResend, isLoading = false }: OtpVerificationCardProps) {
   const [otp, setOtp] = useState<string[]>(Array(otpLength).fill(''));
   const [secondsLeft, setSecondsLeft] = useState(60);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -103,8 +104,8 @@ export function OtpVerificationCard({ email, onVerify, onChangeEmail, onResend }
             <span className="font-semibold text-slate-900">{secondsLeft}s</span>
           </div>
         </div>
-        <Button onClick={handleVerify} className="h-12 w-full rounded-2xl">
-          Verify code
+        <Button onClick={handleVerify} className="h-12 w-full rounded-2xl" disabled={isLoading || otp.join('').length < otpLength}>
+          {isLoading ? 'Verifying...' : 'Verify code'}
         </Button>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Button variant="ghost" onClick={onChangeEmail} className="rounded-2xl text-slate-600">

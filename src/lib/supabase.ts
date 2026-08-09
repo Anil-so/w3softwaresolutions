@@ -17,13 +17,56 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
+export async function sendEmailOtp(email: string) {
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase credentials are not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+  }
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+    },
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function verifyEmailOtp(email: string, token: string) {
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase credentials are not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+  }
+
+  // Primary verification attempt with type: 'email' (for passwordless OTP)
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  });
+
+  if (error) {
+    // Secondary fallback with type: 'signup' for newly registered users
+    const signupRes = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup',
+    });
+
+    if (signupRes.error) {
+      throw error;
+    }
+    return signupRes.data;
+  }
+
+  return data;
+}
+
 export async function getSupabaseHealth() {
   if (!isSupabaseConfigured) {
     return { ok: false, message: 'Supabase is not configured.' };
   }
 
   try {
-    const { error } = await supabase.from('profiles').select('id').limit(1);
+    const { error } = await supabase.from('applicants').select('id').limit(1);
     if (error) {
       return { ok: false, message: error.message };
     }
@@ -34,3 +77,4 @@ export async function getSupabaseHealth() {
     return { ok: false, message };
   }
 }
+

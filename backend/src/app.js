@@ -20,7 +20,7 @@ const app = express();
 app.disable('x-powered-by');
 app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '10mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173', 'https://w3-solution-craft.vercel.app'].filter(Boolean);
