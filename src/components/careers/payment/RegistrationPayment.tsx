@@ -1,4 +1,4 @@
-import { ArrowLeft, BadgeCheck, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -6,9 +6,10 @@ type RegistrationPaymentProps = {
   onPay: () => void;
   onBack: () => void;
   isLoading?: boolean;
+  errorMessage?: string;
 };
 
-export function RegistrationPayment({ onPay, onBack, isLoading = false }: RegistrationPaymentProps) {
+export function RegistrationPayment({ onPay, onBack, isLoading = false, errorMessage }: RegistrationPaymentProps) {
   return (
     <Card className="border-slate-200 bg-white/90 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.35)]">
       <CardHeader className="space-y-3">
@@ -23,9 +24,16 @@ export function RegistrationPayment({ onPay, onBack, isLoading = false }: Regist
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
+        {errorMessage ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+            <div className="flex-1">{errorMessage}</div>
+          </div>
+        ) : null}
+
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center">
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-slate-500">Registration fee</p>
-          <p className="mt-3 text-5xl font-semibold text-slate-900">₹499</p>
+          <p className="mt-3 text-5xl font-semibold text-slate-900">₹49</p>
           <p className="mt-2 text-sm text-slate-500">Secure one-time payment for processing and verification.</p>
         </div>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
@@ -54,7 +62,7 @@ export function RegistrationPayment({ onPay, onBack, isLoading = false }: Regist
         <Button onClick={onPay} className="h-12 w-full rounded-2xl" disabled={isLoading}>
           {isLoading ? 'Processing Checkout...' : 'Pay with Razorpay'}
         </Button>
-        <Button variant="ghost" onClick={onBack} className="h-11 w-full rounded-2xl text-slate-600">
+        <Button variant="ghost" onClick={onBack} className="h-11 w-full rounded-2xl text-slate-600" disabled={isLoading}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>

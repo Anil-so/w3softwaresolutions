@@ -60,6 +60,7 @@ const Careers = () => {
   const [applicationReference, setApplicationReference] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
   const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
   const applicationSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -515,73 +516,106 @@ const Careers = () => {
   const handleMakePayment = async () => {
     setIsLoading(true);
     setFeedbackMessage("");
+    setPaymentError("");
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setFeedbackMessage("Session expired. Please sign in with your email.");
+      if (!session?.user) {
+        setFeedbackMessage("Session expired. Please sign in with your email address.");
         setApplicationStep("auth");
         return;
       }
 
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        throw new Error("Razorpay SDK script failed to load. Please check your internet connection.");
-      }
-
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-      const createOrderRes = await fetch(`${backendUrl}/api/payments/create-order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          applicant_id: currentApplicantId,
-        }),
+      // Step 1: Invoke create-razorpay-order Edge Function via Supabase client
+      const { data: orderData, error: orderError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { applicant_id: currentApplicantId },
       });
 
-      const orderData = await createOrderRes.json();
-      if (!createOrderRes.ok || !orderData.success) {
-        throw new Error(orderData.message || "Failed to create Razorpay order on server.");
+      if (orderError) {
+        let errDesc = orderError.message || "Failed to create payment order.";
+        try {
+          if (orderError.context) {
+            const parsed = await orderError.context.json();
+            if (parsed.error) errDesc = parsed.error;
+            if (parsed.already_paid) {
+              setApplicationStep("dashboard");
+              setFeedbackMessage("Your payment has already been verified.");
+              return;
+            }
+          }
+        } catch (_) {}
+        throw new Error(errDesc);
       }
 
+      if (!orderData?.order_id || !orderData?.key_id) {
+        if (orderData?.already_paid) {
+          setApplicationStep("dashboard");
+          setFeedbackMessage("Your payment has already been verified.");
+          return;
+        }
+        throw new Error(orderData?.error || "Invalid response received from Razorpay order service.");
+      }
+
+      // Step 2: Load Razorpay Checkout SDK dynamically
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error("Razorpay Checkout SDK failed to load. Please check your internet connection.");
+      }
+
+      // Step 3: Open Razorpay Checkout modal
       const options = {
-        key: orderData.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: orderData.key_id,
         amount: orderData.amount,
-        currency: orderData.currency,
+        currency: orderData.currency || "INR",
         name: "W3 Solution Craft",
         description: "Application Registration Fee",
-        order_id: orderData.orderId,
-        handler: async (response: any) => {
+        order_id: orderData.order_id,
+        handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
           setIsLoading(true);
           try {
-            const verifyRes = await fetch(`${backendUrl}/api/payments/verify`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({
+            // Step 4: Verify payment server-side via verify-razorpay-payment Edge Function
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                applicant_id: currentApplicantId,
-              }),
+              },
             });
 
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok || !verifyData.success) {
-              throw new Error(verifyData.message || "Payment signature verification failed.");
+            if (verifyError) {
+              let vErrDesc = verifyError.message || "Payment signature verification failed on server.";
+              try {
+                if (verifyError.context) {
+                  const parsedV = await verifyError.context.json();
+                  if (parsedV.error) vErrDesc = parsedV.error;
+                }
+              } catch (_) {}
+              throw new Error(vErrDesc);
             }
 
-            setApplicationStep("success");
+            if (!verifyData?.success) {
+              throw new Error(verifyData?.error || "Payment verification failed on server.");
+            }
+
+            // Verification successful
+            setPaymentError("");
             setFeedbackMessage("");
+            setApplicationStep("success");
           } catch (vErr: any) {
-            console.error("Payment verify error:", vErr);
-            setFeedbackMessage(vErr.message || "Payment verification failed.");
+            console.error("Payment verification error:", vErr);
+            const msg = vErr.message || "Payment verification failed on server.";
+            setPaymentError(msg);
+            setFeedbackMessage(msg);
           } finally {
             setIsLoading(false);
           }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+            const msg = "Payment was cancelled or closed before completion.";
+            setPaymentError(msg);
+          },
         },
         prefill: {
           email: session.user.email,
@@ -594,14 +628,19 @@ const Careers = () => {
       const razorpayWindow = new (window as any).Razorpay(options);
       razorpayWindow.on("payment.failed", (failRes: any) => {
         console.error("Razorpay payment failed:", failRes);
-        setFeedbackMessage(failRes.error?.description || "Payment failed or was cancelled.");
+        const description = failRes?.error?.description || failRes?.error?.reason || "Payment was declined or failed.";
+        const msg = `Payment Failed: ${description}`;
+        setPaymentError(msg);
+        setFeedbackMessage(msg);
         setIsLoading(false);
       });
+
       razorpayWindow.open();
     } catch (err: any) {
       console.error("Make payment error:", err);
-      setFeedbackMessage(err.message || "Failed to launch Razorpay checkout.");
-    } finally {
+      const msg = err.message || "Failed to launch Razorpay checkout.";
+      setPaymentError(msg);
+      setFeedbackMessage(msg);
       setIsLoading(false);
     }
   };
@@ -848,7 +887,15 @@ const Careers = () => {
                     }} />
                   )}
                   {applicationStep === "payment" && (
-                    <RegistrationPayment onPay={handleMakePayment} onBack={() => setApplicationStep("application")} isLoading={isLoading} />
+                    <RegistrationPayment
+                      onPay={handleMakePayment}
+                      onBack={() => {
+                        setPaymentError("");
+                        setApplicationStep("application");
+                      }}
+                      isLoading={isLoading}
+                      errorMessage={paymentError}
+                    />
                   )}
                   {applicationStep === "success" && (
                     <PaymentSuccess referenceNumber={applicationReference} onGoToDashboard={handleGoToDashboard} />

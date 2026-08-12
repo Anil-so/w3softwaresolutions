@@ -95,7 +95,7 @@ create table if not exists public.payments (
   razorpay_payment_id text,
   razorpay_signature text,
   payment_method text not null default 'razorpay' check (payment_method in ('razorpay','bank_transfer','offline')),
-  amount numeric(10,2) not null default 499.00,
+  amount numeric(10,2) not null default 49.00,
   currency text not null default 'INR' check (currency = 'INR'),
   status text not null default 'pending' check (status in ('pending','captured','failed','refunded')),
   payment_timestamp timestamptz,

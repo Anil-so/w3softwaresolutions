@@ -45,7 +45,7 @@ router.post('/create-order', authenticateToken, asyncHandler(async (req, res) =>
     }
   }
 
-  const registrationFeePaise = 49900; // ₹499.00
+  const registrationFeePaise = 4900; // ₹49.00
   const currency = 'INR';
 
   const options = {
@@ -124,7 +124,7 @@ router.post('/verify', authenticateToken, asyncHandler(async (req, res) => {
         razorpay_payment_id,
         razorpay_signature,
         payment_method: 'razorpay',
-        amount: 499.00,
+        amount: 49.00,
         currency: 'INR',
         status: 'captured',
         payment_timestamp: new Date().toISOString(),
@@ -199,7 +199,7 @@ router.post('/webhook', asyncHandler(async (req, res) => {
             razorpay_payment_id,
             razorpay_signature: signature,
             payment_method: 'razorpay',
-            amount: (paymentEntity.amount || 49900) / 100,
+            amount: (paymentEntity.amount || 4900) / 100,
             currency: paymentEntity.currency || 'INR',
             status: 'captured',
             payment_timestamp: new Date().toISOString(),
