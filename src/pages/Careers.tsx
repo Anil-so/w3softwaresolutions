@@ -61,6 +61,7 @@ const Careers = () => {
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [applicantMobile, setApplicantMobile] = useState("");
   const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
   const applicationSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -72,20 +73,21 @@ const Careers = () => {
           setApplicantEmail(session.user.email);
           let { data: applicant, error } = await supabase
             .from('applicants')
-            .select('id, application_number, payment_status, application_status')
+            .select('id, application_number, payment_status, application_status, mobile')
             .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
             .maybeSingle();
 
           if (error && (error.message?.includes('user_id') || error.code === 'PGRST204')) {
             const fallback = await supabase
               .from('applicants')
-              .select('id, application_number, payment_status, application_status')
+              .select('id, application_number, payment_status, application_status, mobile')
               .eq('email', session.user.email)
               .maybeSingle();
             applicant = fallback.data;
           }
 
           if (applicant) {
+            if (applicant.mobile) setApplicantMobile(applicant.mobile);
             setCurrentApplicantId(applicant.id);
             setApplicationReference(applicant.application_number || '');
             if (applicant.payment_status === 'verified') {
@@ -403,20 +405,21 @@ const Careers = () => {
         setFeedbackMessage("Email verified successfully!");
         let { data: applicant, error: fetchErr } = await supabase
           .from("applicants")
-          .select("id, application_number, payment_status, application_status")
+          .select("id, application_number, payment_status, application_status, mobile")
           .or(`user_id.eq.${user.id},email.eq.${user.email}`)
           .maybeSingle();
 
         if (fetchErr && (fetchErr.message?.includes("user_id") || fetchErr.code === "PGRST204")) {
           const fallback = await supabase
             .from("applicants")
-            .select("id, application_number, payment_status, application_status")
+            .select("id, application_number, payment_status, application_status, mobile")
             .eq("email", user.email)
             .maybeSingle();
           applicant = fallback.data;
         }
 
         if (applicant) {
+          if (applicant.mobile) setApplicantMobile(applicant.mobile);
           setCurrentApplicantId(applicant.id);
           setApplicationReference(applicant.application_number || "");
           if (applicant.payment_status === "verified") {
@@ -481,6 +484,9 @@ const Careers = () => {
   const handleApplicationSubmit = async (data: ApplicantFormData) => {
     setIsLoading(true);
     setFeedbackMessage("");
+    if (data.mobile) {
+      setApplicantMobile(data.mobile);
+    }
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
@@ -607,6 +613,13 @@ const Careers = () => {
         name: "W3 Solution Craft",
         description: "Application Registration Fee",
         order_id: orderData.order_id,
+        prefill: {
+          email: session.user.email,
+          contact: applicantMobile || undefined,
+        },
+        theme: {
+          color: "#0f172a",
+        },
         handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
           setIsLoading(true);
           try {
@@ -653,12 +666,6 @@ const Careers = () => {
             const msg = "Payment was cancelled or closed before completion.";
             setPaymentError(msg);
           },
-        },
-        prefill: {
-          email: session.user.email,
-        },
-        theme: {
-          color: "#0f172a",
         },
       };
 
