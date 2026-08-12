@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/lib/supabase';
+import { getResumeSignedUrl } from '@/lib/storage';
 
 const sidebarItems = [
   { label: 'Dashboard', icon: LayoutDashboard },
@@ -24,6 +25,7 @@ type ApplicantDetails = {
   payment_status: string;
   application_status: string;
   profile_completion_percent: number;
+  resume_path?: string;
 };
 
 export function ApplicantDashboard({ onLogout }: ApplicantDashboardProps) {
@@ -41,14 +43,14 @@ export function ApplicantDashboard({ onLogout }: ApplicantDashboardProps) {
 
         let { data, error } = await supabase
           .from('applicants')
-          .select('full_name, email, application_number, payment_status, application_status, profile_completion_percent')
+          .select('full_name, email, application_number, payment_status, application_status, profile_completion_percent, resume_path')
           .or(`user_id.eq.${user.id},email.eq.${user.email}`)
           .maybeSingle();
 
         if (error && (error.message?.includes('user_id') || error.code === 'PGRST204')) {
           const fallback = await supabase
             .from('applicants')
-            .select('full_name, email, application_number, payment_status, application_status, profile_completion_percent')
+            .select('full_name, email, application_number, payment_status, application_status, profile_completion_percent, resume_path')
             .eq('email', user.email)
             .maybeSingle();
           data = fallback.data;
@@ -65,6 +67,25 @@ export function ApplicantDashboard({ onLogout }: ApplicantDashboardProps) {
     }
     loadData();
   }, []);
+
+  const [downloadingResume, setDownloadingResume] = useState(false);
+
+  const handleDownloadResume = async () => {
+    if (!applicant?.resume_path) return;
+    setDownloadingResume(true);
+    try {
+      const { url, error } = await getResumeSignedUrl(applicant.resume_path, 3600);
+      if (error || !url) {
+        alert(error || 'Could not generate download link.');
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (err: any) {
+      console.error('Download resume error:', err);
+    } finally {
+      setDownloadingResume(false);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -127,9 +148,22 @@ export function ApplicantDashboard({ onLogout }: ApplicantDashboardProps) {
               <p className="text-sm text-slate-500">Payment status</p>
               <p className="mt-3 text-3xl font-semibold text-slate-900">{loading ? '...' : paymentDisplay}</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">Resume status</p>
-              <p className="mt-3 text-3xl font-semibold text-slate-900">Ready</p>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex flex-col justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Resume status</p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900">{applicant?.resume_path ? 'Uploaded' : 'Pending'}</p>
+              </div>
+              {applicant?.resume_path && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadResume}
+                  disabled={downloadingResume}
+                  className="mt-3 w-full rounded-xl text-xs"
+                >
+                  {downloadingResume ? 'Generating Link...' : 'View Resume'}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

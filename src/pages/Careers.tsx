@@ -513,6 +513,7 @@ const Careers = () => {
         skills: data.skills,
         portfolio: data.portfolio,
         linkedin: data.linkedIn,
+        resume_path: data.resumePath || null,
         email_verified: true,
         profile_completion_percent: 85,
         application_status: "submitted",
@@ -578,15 +579,26 @@ const Careers = () => {
         let errDesc = orderError.message || "Failed to create payment order.";
         try {
           if (orderError.context) {
-            const parsed = await orderError.context.json();
-            if (parsed.error) errDesc = parsed.error;
-            if (parsed.already_paid) {
-              setApplicationStep("dashboard");
-              setFeedbackMessage("Your payment has already been verified.");
-              return;
+            const res = orderError.context as Response;
+            if (typeof res.json === 'function') {
+              const cloned = res.clone ? res.clone() : res;
+              const parsed = await cloned.json();
+              if (parsed?.error) errDesc = parsed.error;
+              if (parsed?.already_paid) {
+                setApplicationStep("dashboard");
+                setFeedbackMessage("Your payment has already been verified.");
+                return;
+              }
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          try {
+            if (orderError.context && typeof (orderError.context as Response).text === 'function') {
+              const text = await (orderError.context as Response).text();
+              if (text) errDesc = text;
+            }
+          } catch (__) {}
+        }
         throw new Error(errDesc);
       }
 
@@ -1117,7 +1129,7 @@ const Careers = () => {
               We're always interested in meeting talented individuals. Send us your resume and
               tell us about your skills and interests.
             </p>
-            <Button>
+            <Button onClick={() => handleApplyNow(jobOpenings[0])}>
               <Mail className="mr-2 h-4 w-4" />
               Send Your Resume
             </Button>

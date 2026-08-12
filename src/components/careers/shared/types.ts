@@ -18,5 +18,6 @@ export type ApplicantFormData = {
   skills: string;
   portfolio: string;
   linkedIn: string;
+  resumePath?: string;
   declarationAccepted: boolean;
 };

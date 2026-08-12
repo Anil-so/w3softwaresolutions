@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react';
-import { BadgeCheck, ChevronLeft, ChevronRight, FileText, UploadCloud } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { AlertCircle, BadgeCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, Trash2, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { ApplicantFormData } from '@/components/careers/shared/types';
+import { supabase } from '@/lib/supabase';
+import { uploadResumeFile, validateResumeFile, deleteResumeFile } from '@/lib/storage';
 
 type ApplicationWizardProps = {
   onSubmit: (data: ApplicantFormData) => void;
@@ -32,6 +34,7 @@ const initialFormState: ApplicantFormData = {
   skills: '',
   portfolio: '',
   linkedIn: '',
+  resumePath: '',
   declarationAccepted: false,
 };
 
@@ -46,11 +49,62 @@ const steps = [
 export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardProps) {
   const [formData, setFormData] = useState<ApplicantFormData>({ ...initialFormState, ...initialData });
   const [activeStep, setActiveStep] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const progress = useMemo(() => ((activeStep + 1) / steps.length) * 100, [activeStep]);
 
   const updateField = (field: keyof ApplicantFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    const validation = validateResumeFile(file);
+    if (!validation.valid) {
+      setUploadError(validation.error || 'Invalid file.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setUploadError('Unauthenticated user. Please verify your email first.');
+        setUploading(false);
+        return;
+      }
+
+      const result = await uploadResumeFile(file, user.id, formData.resumePath);
+      if (result.error || !result.path) {
+        setUploadError(result.error || 'Failed to upload resume.');
+      } else {
+        updateField('resumePath', result.path);
+        setUploadedFileName(file.name);
+        setUploadError(null);
+      }
+    } catch (err: any) {
+      console.error('File selection upload error:', err);
+      setUploadError(err.message || 'Error uploading file.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveResume = async () => {
+    if (formData.resumePath) {
+      await deleteResumeFile(formData.resumePath);
+      updateField('resumePath', '');
+      setUploadedFileName(null);
+    }
+    setUploadError(null);
   };
 
   const nextStep = () => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
@@ -170,18 +224,69 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
               <Input value={formData.skills} onChange={(event) => updateField('skills', event.target.value)} placeholder="React, Node.js, TypeScript" />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium text-slate-700">Resume upload</label>
-              <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5">
+              <label className="text-sm font-medium text-slate-700">Resume upload (PDF, DOC, DOCX - Max 5MB)</label>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+
+              {uploadError && (
+                <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-white p-2 text-slate-700 shadow-sm">
+                  <div className="rounded-2xl bg-white p-2.5 text-slate-700 shadow-sm">
                     <UploadCloud className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900">Upload resume</p>
-                    <p className="text-sm text-slate-500">PDF, DOCX, or TXT (UI preview only)</p>
+                    {formData.resumePath ? (
+                      <div>
+                        <div className="flex items-center gap-1.5 text-sm font-semibold text-emerald-800">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <span>Resume Uploaded</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {uploadedFileName ? uploadedFileName : formData.resumePath.split('/').pop()}
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">Upload your resume</p>
+                        <p className="text-xs text-slate-500">Supports PDF, DOC, DOCX up to 5 MB</p>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <Button type="button" variant="outline" className="rounded-2xl">Choose file</Button>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="rounded-2xl"
+                  >
+                    {uploading ? 'Uploading...' : formData.resumePath ? 'Replace file' : 'Choose file'}
+                  </Button>
+                  {formData.resumePath && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleRemoveResume}
+                      disabled={uploading}
+                      className="rounded-2xl text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
@@ -224,7 +329,7 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button type="button" onClick={handleSubmit} className="rounded-2xl" disabled={!formData.declarationAccepted}>
+            <Button type="button" onClick={handleSubmit} className="rounded-2xl" disabled={!formData.declarationAccepted || uploading}>
               Submit application
             </Button>
           )}
