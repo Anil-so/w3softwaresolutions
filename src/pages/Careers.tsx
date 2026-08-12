@@ -70,11 +70,20 @@ const Careers = () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.email) {
           setApplicantEmail(session.user.email);
-          const { data: applicant } = await supabase
+          let { data: applicant, error } = await supabase
             .from('applicants')
             .select('id, application_number, payment_status, application_status')
             .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
             .maybeSingle();
+
+          if (error && (error.message?.includes('user_id') || error.code === 'PGRST204')) {
+            const fallback = await supabase
+              .from('applicants')
+              .select('id, application_number, payment_status, application_status')
+              .eq('email', session.user.email)
+              .maybeSingle();
+            applicant = fallback.data;
+          }
 
           if (applicant) {
             setCurrentApplicantId(applicant.id);
@@ -392,11 +401,20 @@ const Careers = () => {
       const user = data?.user || data?.session?.user;
       if (user) {
         setFeedbackMessage("Email verified successfully!");
-        const { data: applicant } = await supabase
+        let { data: applicant, error: fetchErr } = await supabase
           .from("applicants")
           .select("id, application_number, payment_status, application_status")
           .or(`user_id.eq.${user.id},email.eq.${user.email}`)
           .maybeSingle();
+
+        if (fetchErr && (fetchErr.message?.includes("user_id") || fetchErr.code === "PGRST204")) {
+          const fallback = await supabase
+            .from("applicants")
+            .select("id, application_number, payment_status, application_status")
+            .eq("email", user.email)
+            .maybeSingle();
+          applicant = fallback.data;
+        }
 
         if (applicant) {
           setCurrentApplicantId(applicant.id);
@@ -409,22 +427,29 @@ const Careers = () => {
             setApplicationStep("application");
           }
         } else {
-          const { data: newApplicant } = await supabase
+          const newPayload: any = {
+            user_id: user.id,
+            email: user.email,
+            full_name: "",
+            mobile: "",
+            email_verified: true,
+          };
+
+          let { data: newApplicant, error: createErr } = await supabase
             .from("applicants")
-            .upsert(
-              [
-                {
-                  user_id: user.id,
-                  email: user.email,
-                  full_name: "",
-                  mobile: "",
-                  email_verified: true,
-                },
-              ],
-              { onConflict: "email" }
-            )
+            .upsert([newPayload], { onConflict: "email" })
             .select("id, application_number")
             .maybeSingle();
+
+          if (createErr && (createErr.message?.includes("user_id") || createErr.code === "PGRST204")) {
+            delete newPayload.user_id;
+            const retry = await supabase
+              .from("applicants")
+              .upsert([newPayload], { onConflict: "email" })
+              .select("id, application_number")
+              .maybeSingle();
+            newApplicant = retry.data;
+          }
 
           if (newApplicant) {
             setCurrentApplicantId(newApplicant.id);
@@ -461,7 +486,7 @@ const Careers = () => {
       const userId = session?.user?.id;
       const userEmail = session?.user?.email || applicantEmail;
 
-      const payload = {
+      const payload: any = {
         user_id: userId,
         full_name: data.fullName,
         email: userEmail,
@@ -487,11 +512,23 @@ const Careers = () => {
         application_status: "submitted",
       };
 
-      const { data: updatedApplicant, error } = await supabase
+      let { data: updatedApplicant, error } = await supabase
         .from("applicants")
         .upsert([payload], { onConflict: "email" })
         .select("id, application_number")
         .single();
+
+      if (error && (error.message?.includes("user_id") || error.code === "PGRST204")) {
+        delete payload.user_id;
+        const retryRes = await supabase
+          .from("applicants")
+          .upsert([payload], { onConflict: "email" })
+          .select("id, application_number")
+          .single();
+
+        updatedApplicant = retryRes.data;
+        error = retryRes.error;
+      }
 
       if (error) {
         console.error("Application submit DB error:", error);

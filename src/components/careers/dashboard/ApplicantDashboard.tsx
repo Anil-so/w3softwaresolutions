@@ -39,11 +39,20 @@ export function ApplicantDashboard({ onLogout }: ApplicantDashboardProps) {
           return;
         }
 
-        const { data } = await supabase
+        let { data, error } = await supabase
           .from('applicants')
           .select('full_name, email, application_number, payment_status, application_status, profile_completion_percent')
           .or(`user_id.eq.${user.id},email.eq.${user.email}`)
           .maybeSingle();
+
+        if (error && (error.message?.includes('user_id') || error.code === 'PGRST204')) {
+          const fallback = await supabase
+            .from('applicants')
+            .select('full_name, email, application_number, payment_status, application_status, profile_completion_percent')
+            .eq('email', user.email)
+            .maybeSingle();
+          data = fallback.data;
+        }
 
         if (data) {
           setApplicant(data);
