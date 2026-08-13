@@ -14,6 +14,7 @@ import CustomSoftware from "./pages/CustomSoftware";
 import UIUXDesign from "./pages/UIUXDesign";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
 import Careers from "./pages/Careers";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./admin/AdminLayout";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/ui-ux-design" element={<UIUXDesign />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/careers" element={<Careers />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>

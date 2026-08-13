@@ -622,8 +622,8 @@ const Careers = () => {
         key: orderData.key_id,
         amount: orderData.amount,
         currency: orderData.currency || "INR",
-        name: "W3 Solution Craft",
-        description: "Application Registration Fee",
+        name: "W3 Software Solutions",
+        description: "Application Processing Fee",
         order_id: orderData.order_id,
         prefill: {
           email: session.user.email,
@@ -675,7 +675,7 @@ const Careers = () => {
         modal: {
           ondismiss: () => {
             setIsLoading(false);
-            const msg = "Payment was cancelled or closed before completion.";
+            const msg = "Payment was not completed. Your application has not been marked as paid.";
             setPaymentError(msg);
           },
         },
@@ -685,7 +685,7 @@ const Careers = () => {
       razorpayWindow.on("payment.failed", (failRes: any) => {
         console.error("Razorpay payment failed:", failRes);
         const description = failRes?.error?.description || failRes?.error?.reason || "Payment was declined or failed.";
-        const msg = `Payment Failed: ${description}`;
+        const msg = `Payment was not completed. Your application has not been marked as paid. (${description})`;
         setPaymentError(msg);
         setFeedbackMessage(msg);
         setIsLoading(false);
