@@ -83,12 +83,30 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Find applicant record
-    const { data: applicant, error: applicantError } = await adminClient
+    // Find applicant record with fallback for missing user_id column
+    let applicant = null;
+    let applicantError = null;
+
+    const primaryRes = await adminClient
       .from('applicants')
       .select('id, payment_status, full_name, email')
       .or(`user_id.eq.${user.id},email.eq.${user.email}`)
       .maybeSingle();
+
+    if (primaryRes.data) {
+      applicant = primaryRes.data;
+    } else if (primaryRes.error && (primaryRes.error.message?.includes('user_id') || primaryRes.error.code === '42703' || primaryRes.error.code === 'PGRST204')) {
+      console.warn('[verify-razorpay-payment] user_id column query failed, using email fallback.');
+      const fallbackRes = await adminClient
+        .from('applicants')
+        .select('id, payment_status, full_name, email')
+        .eq('email', user.email)
+        .maybeSingle();
+      applicant = fallbackRes.data;
+      applicantError = fallbackRes.error;
+    } else {
+      applicantError = primaryRes.error;
+    }
 
     if (applicantError || !applicant) {
       return new Response(

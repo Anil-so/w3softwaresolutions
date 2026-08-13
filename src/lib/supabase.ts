@@ -19,7 +19,7 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 export async function sendEmailOtp(email: string) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase credentials are not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+    throw new Error('Supabase credentials are not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
   }
   const { data, error } = await supabase.auth.signInWithOtp({
     email,
@@ -27,7 +27,15 @@ export async function sendEmailOtp(email: string) {
       shouldCreateUser: true,
     },
   });
-  if (error) throw error;
+
+  if (error) {
+    let msg = error.message;
+    if (msg.includes('Error sending confirmation email') || msg.includes('confirmation email') || (error as any).status === 500) {
+      msg = 'Failed to send verification email. Please verify that Custom SMTP (Brevo) is enabled and configured in Supabase Dashboard (Authentication -> Providers -> Email -> Custom SMTP).';
+    }
+    throw new Error(msg);
+  }
+
   return data;
 }
 
