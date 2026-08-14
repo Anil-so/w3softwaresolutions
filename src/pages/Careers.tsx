@@ -3,16 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, MapPin, Clock, Users, Mail, Briefcase, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Users, Mail, Briefcase, UserCircle, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
-import { EmailAuthCard } from "@/components/careers/auth/EmailAuthCard";
-import { OtpVerificationCard } from "@/components/careers/otp/OtpVerificationCard";
+import { CandidateOtpModal } from "@/components/careers/auth/CandidateOtpModal";
 import { ApplicationWizard } from "@/components/careers/application/ApplicationWizard";
 import { RegistrationPayment } from "@/components/careers/payment/RegistrationPayment";
 import { PaymentSuccess } from "@/components/careers/payment/PaymentSuccess";
 import { ApplicantDashboard } from "@/components/careers/dashboard/ApplicantDashboard";
 import type { ApplicantFormData } from "@/components/careers/shared/types";
-import { supabase, sendEmailOtp, verifyEmailOtp } from "@/lib/supabase";
+import {
+  supabase,
+  sendEmailOtp,
+  verifyEmailOtp,
+} from "@/lib/supabase";
 
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -55,51 +58,95 @@ type JobOpening = {
 const Careers = () => {
   const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
   const [applicationJob, setApplicationJob] = useState<JobOpening | null>(null);
-  const [applicationStep, setApplicationStep] = useState<"auth" | "otp" | "application" | "payment" | "success" | "dashboard">("auth");
+
+  // Modal / Flow states
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [applicationStep, setApplicationStep] = useState<"application" | "payment" | "success" | "dashboard">("application");
+
+  // User & Application data
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [applicantEmail, setApplicantEmail] = useState("");
+  const [applicantName, setApplicantName] = useState("");
   const [applicationReference, setApplicationReference] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const [applicantMobile, setApplicantMobile] = useState("");
   const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
-  const applicationSectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    async function syncApplicantFromUser(user: any) {
+      if (!user?.email) return;
+      const cleanEmail = user.email.trim().toLowerCase();
+      setIsAuthenticated(true);
+      setApplicantEmail(cleanEmail);
+
+      let { data: applicant, error } = await supabase
+        .from('applicants')
+        .select('id, application_number, payment_status, application_status, mobile, user_id, full_name')
+        .or(`user_id.eq.${user.id},email.eq.${cleanEmail}`)
+        .maybeSingle();
+
+      if (error && (error.message?.includes('user_id') || error.code === 'PGRST204')) {
+        const fallback = await supabase
+          .from('applicants')
+          .select('id, application_number, payment_status, application_status, mobile, full_name')
+          .eq('email', cleanEmail)
+          .maybeSingle();
+        applicant = fallback.data;
+      }
+
+      if (applicant) {
+        if (!applicant.user_id) {
+          await supabase
+            .from('applicants')
+            .update({ user_id: user.id })
+            .eq('id', applicant.id);
+        }
+        if (applicant.full_name) setApplicantName(applicant.full_name);
+        if (applicant.mobile) setApplicantMobile(applicant.mobile);
+        setCurrentApplicantId(applicant.id);
+        setApplicationReference(applicant.application_number || '');
+
+        if (applicant.payment_status === 'verified') {
+          setApplicationStep('dashboard');
+        } else if (applicant.application_status === 'submitted') {
+          setApplicationStep('payment');
+        } else {
+          setApplicationStep('application');
+        }
+      } else {
+        const newPayload: any = {
+          user_id: user.id,
+          email: cleanEmail,
+          full_name: '',
+          email_verified: true,
+          payment_status: 'pending',
+          application_status: 'draft',
+        };
+
+        let { data: newApplicant } = await supabase
+          .from('applicants')
+          .upsert([newPayload], { onConflict: 'email' })
+          .select('id, application_number')
+          .maybeSingle();
+
+        if (newApplicant) {
+          setCurrentApplicantId(newApplicant.id);
+          setApplicationReference(newApplicant.application_number || '');
+        }
+        setApplicationStep('application');
+      }
+    }
+
     async function checkSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.email) {
-          setApplicantEmail(session.user.email);
-          let { data: applicant, error } = await supabase
-            .from('applicants')
-            .select('id, application_number, payment_status, application_status, mobile')
-            .or(`user_id.eq.${session.user.id},email.eq.${session.user.email}`)
-            .maybeSingle();
-
-          if (error && (error.message?.includes('user_id') || error.code === 'PGRST204')) {
-            const fallback = await supabase
-              .from('applicants')
-              .select('id, application_number, payment_status, application_status, mobile')
-              .eq('email', session.user.email)
-              .maybeSingle();
-            applicant = fallback.data;
-          }
-
-          if (applicant) {
-            if (applicant.mobile) setApplicantMobile(applicant.mobile);
-            setCurrentApplicantId(applicant.id);
-            setApplicationReference(applicant.application_number || '');
-            if (applicant.payment_status === 'verified') {
-              setApplicationStep('dashboard');
-            } else if (applicant.application_status === 'submitted') {
-              setApplicationStep('payment');
-            } else {
-              setApplicationStep('application');
-            }
-          } else {
-            setApplicationStep('application');
-          }
+        if (session?.user) {
+          await syncApplicantFromUser(session.user);
+        } else {
+          setIsAuthenticated(false);
         }
       } catch (err) {
         console.error('Session check error:', err);
@@ -108,8 +155,11 @@ const Careers = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user?.email) {
-        setApplicantEmail(session.user.email);
+      if (session?.user) {
+        setIsAuthenticated(true);
+        setApplicantEmail((session.user.email || '').toLowerCase());
+      } else {
+        setIsAuthenticated(false);
       }
     });
 
@@ -362,120 +412,108 @@ const Careers = () => {
     { question: "Who can apply?", answer: "Freshers and candidates with 0–3 years experience." },
     { question: "Is Remote Available?", answer: "Yes, remote roles are available for select positions." },
     { question: "What is the salary?", answer: "The salary range is ₹4 LPA – ₹7 LPA depending on skills and experience." },
-    { question: "Is there an application fee?", answer: "Yes, the application registration fee is ₹49." },
-    { question: "Does payment guarantee a job?", answer: "No, payment only covers application processing and verification." }
+    { question: "Is there an application processing fee?", answer: "Yes, the application processing and candidate verification fee is ₹49." },
+    { question: "Does payment guarantee a job?", answer: "No, payment only covers application processing and candidate verification." }
   ];
 
   const handleApplyNow = (job: JobOpening) => {
     setApplicationJob(job);
     setSelectedJob(null);
-    setApplicationStep("auth");
     setFeedbackMessage("");
-    setTimeout(() => {
-      applicationSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
+
+    if (isAuthenticated) {
+      setIsApplicationModalOpen(true);
+    } else {
+      setIsOtpModalOpen(true);
+    }
   };
 
-  const handleContinueAuth = async () => {
-    if (!applicantEmail.trim()) {
-      setFeedbackMessage("Please enter your email address to continue.");
-      return;
+  const handleOpenTrackApplication = () => {
+    if (isAuthenticated) {
+      setIsApplicationModalOpen(true);
+    } else {
+      setIsOtpModalOpen(true);
     }
-    setFeedbackMessage("");
+  };
+
+  const handleSendOtp = async (email: string) => {
     setIsLoading(true);
+    setFeedbackMessage("");
     try {
-      await sendEmailOtp(applicantEmail.trim().toLowerCase());
-      setFeedbackMessage(`Verification OTP sent to ${applicantEmail}. Please check your inbox.`);
-      setApplicationStep("otp");
+      await sendEmailOtp(email);
+      setApplicantEmail(email);
     } catch (err: any) {
-      console.error("Auth OTP send error:", err);
-      setFeedbackMessage(err.message || "Failed to send verification email OTP.");
+      console.error("Send OTP error:", err);
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerifyOtp = async (otpValue: string) => {
-    setFeedbackMessage("");
+  const handleVerifyOtp = async (email: string, otp: string) => {
     setIsLoading(true);
+    setFeedbackMessage("");
     try {
-      const data = await verifyEmailOtp(applicantEmail.trim().toLowerCase(), otpValue);
+      const data = await verifyEmailOtp(email, otp);
       const user = data?.user || data?.session?.user;
-      if (user) {
-        setFeedbackMessage("Email verified successfully!");
-        let { data: applicant, error: fetchErr } = await supabase
-          .from("applicants")
-          .select("id, application_number, payment_status, application_status, mobile")
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .maybeSingle();
 
-        if (fetchErr && (fetchErr.message?.includes("user_id") || fetchErr.code === "PGRST204")) {
-          const fallback = await supabase
-            .from("applicants")
-            .select("id, application_number, payment_status, application_status, mobile")
-            .eq("email", user.email)
-            .maybeSingle();
-          applicant = fallback.data;
+      if (!user) {
+        throw new Error("Invalid verification code. Please check your email and try again.");
+      }
+
+      const userEmail = (user.email || email).trim().toLowerCase();
+      setIsAuthenticated(true);
+      setApplicantEmail(userEmail);
+
+      let { data: applicant } = await supabase
+        .from("applicants")
+        .select("id, application_number, payment_status, application_status, mobile, user_id, full_name")
+        .or(`user_id.eq.${user.id},email.eq.${userEmail}`)
+        .maybeSingle();
+
+      if (applicant) {
+        if (!applicant.user_id) {
+          await supabase.from("applicants").update({ user_id: user.id }).eq("id", applicant.id);
         }
+        if (applicant.full_name) setApplicantName(applicant.full_name);
+        if (applicant.mobile) setApplicantMobile(applicant.mobile);
+        setCurrentApplicantId(applicant.id);
+        setApplicationReference(applicant.application_number || "");
 
-        if (applicant) {
-          if (applicant.mobile) setApplicantMobile(applicant.mobile);
-          setCurrentApplicantId(applicant.id);
-          setApplicationReference(applicant.application_number || "");
-          if (applicant.payment_status === "verified") {
-            setApplicationStep("dashboard");
-          } else if (applicant.application_status === "submitted") {
-            setApplicationStep("payment");
-          } else {
-            setApplicationStep("application");
-          }
+        if (applicant.payment_status === "verified") {
+          setApplicationStep("dashboard");
+        } else if (applicant.application_status === "submitted") {
+          setApplicationStep("payment");
         } else {
-          const newPayload: any = {
-            user_id: user.id,
-            email: user.email,
-            full_name: "",
-            mobile: "",
-            email_verified: true,
-          };
-
-          let { data: newApplicant, error: createErr } = await supabase
-            .from("applicants")
-            .upsert([newPayload], { onConflict: "email" })
-            .select("id, application_number")
-            .maybeSingle();
-
-          if (createErr && (createErr.message?.includes("user_id") || createErr.code === "PGRST204")) {
-            delete newPayload.user_id;
-            const retry = await supabase
-              .from("applicants")
-              .upsert([newPayload], { onConflict: "email" })
-              .select("id, application_number")
-              .maybeSingle();
-            newApplicant = retry.data;
-          }
-
-          if (newApplicant) {
-            setCurrentApplicantId(newApplicant.id);
-            setApplicationReference(newApplicant.application_number || "");
-          }
           setApplicationStep("application");
         }
-      }
-    } catch (err: any) {
-      console.error("OTP verification error:", err);
-      setFeedbackMessage(err.message || "Invalid or expired verification code.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      } else {
+        const newPayload: any = {
+          user_id: user.id,
+          email: userEmail,
+          full_name: "",
+          email_verified: true,
+          payment_status: "pending",
+          application_status: "draft",
+        };
 
-  const handleResendOtp = async () => {
-    setIsLoading(true);
-    try {
-      await sendEmailOtp(applicantEmail.trim().toLowerCase());
-      setFeedbackMessage(`A fresh verification code was sent to ${applicantEmail}.`);
+        const { data: newApplicant } = await supabase
+          .from("applicants")
+          .upsert([newPayload], { onConflict: "email" })
+          .select("id, application_number")
+          .maybeSingle();
+
+        if (newApplicant) {
+          setCurrentApplicantId(newApplicant.id);
+          setApplicationReference(newApplicant.application_number || "");
+        }
+        setApplicationStep("application");
+      }
+
+      setIsApplicationModalOpen(true);
     } catch (err: any) {
-      setFeedbackMessage(err.message || "Failed to resend code.");
+      console.error("Verify OTP error:", err);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -489,8 +527,14 @@ const Careers = () => {
     }
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-      const userEmail = session?.user?.email || applicantEmail;
+      if (!session?.user) {
+        setFeedbackMessage("Your session has expired. Please verify your email again.");
+        setIsApplicationModalOpen(false);
+        setIsOtpModalOpen(true);
+        return;
+      }
+      const userId = session.user.id;
+      const userEmail = (session.user.email || applicantEmail).trim().toLowerCase();
 
       const payload: any = {
         user_id: userId,
@@ -547,7 +591,7 @@ const Careers = () => {
         setApplicationReference(updatedApplicant.application_number || "");
       }
 
-      setFeedbackMessage("Application submitted! Please proceed to complete registration payment.");
+      setFeedbackMessage("Application details saved! Please proceed to complete candidate verification payment.");
       setApplicationStep("payment");
     } catch (err: any) {
       console.error("Application submit error:", err);
@@ -565,12 +609,12 @@ const Careers = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        setFeedbackMessage("Session expired. Please sign in with your email address.");
-        setApplicationStep("auth");
+        setFeedbackMessage("Your session has expired. Please verify your email again.");
+        setIsApplicationModalOpen(false);
+        setIsOtpModalOpen(true);
         return;
       }
 
-      // Step 1: Invoke create-razorpay-order Edge Function via Supabase client
       const { data: orderData, error: orderError } = await supabase.functions.invoke("create-razorpay-order", {
         body: { applicant_id: currentApplicantId },
       });
@@ -611,13 +655,11 @@ const Careers = () => {
         throw new Error(orderData?.error || "Invalid response received from Razorpay order service.");
       }
 
-      // Step 2: Load Razorpay Checkout SDK dynamically
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         throw new Error("Razorpay Checkout SDK failed to load. Please check your internet connection.");
       }
 
-      // Step 3: Open Razorpay Checkout modal
       const options = {
         key: orderData.key_id,
         amount: orderData.amount,
@@ -635,7 +677,6 @@ const Careers = () => {
         handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
           setIsLoading(true);
           try {
-            // Step 4: Verify payment server-side via verify-razorpay-payment Edge Function
             const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
               body: {
                 razorpay_order_id: response.razorpay_order_id,
@@ -659,7 +700,6 @@ const Careers = () => {
               throw new Error(verifyData?.error || "Payment verification failed on server.");
             }
 
-            // Verification successful
             setPaymentError("");
             setFeedbackMessage("");
             setApplicationStep("success");
@@ -705,24 +745,60 @@ const Careers = () => {
     setApplicationStep("dashboard");
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setApplicantEmail("");
+    setApplicantName("");
+    setApplicationReference("");
+    setIsApplicationModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 pt-32 pb-20">
-        <div className="mb-8">
-          <Link to="/">
-            <Button variant="ghost" className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold text-foreground mb-4">Join Our Team</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl">
-            Be part of a dynamic team that's shaping the future of software development.
-            We're always looking for talented individuals who share our passion for innovation.
-          </p>
+        {/* Header Navigation & Candidate Action Bar */}
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <Link to="/">
+              <Button variant="ghost" className="mb-4">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Join Our Team</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl">
+              Be part of a dynamic team that's shaping the future of software development.
+              We're always looking for talented individuals who share our passion for innovation.
+            </p>
+          </div>
+
+          {/* Track Application / Candidate Dashboard Button */}
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm">
+                <UserCircle className="h-5 w-5 text-slate-700" />
+                <div className="text-xs">
+                  <p className="font-semibold text-slate-900">{applicantName || applicantEmail}</p>
+                  <p className="text-slate-500 capitalize">{applicationStep === 'dashboard' ? 'Applicant Portal' : 'Application in Progress'}</p>
+                </div>
+                <Button size="sm" onClick={handleOpenTrackApplication} className="ml-2 rounded-xl text-xs min-h-[36px]">
+                  Candidate Dashboard
+                </Button>
+                <Button size="icon" variant="ghost" onClick={handleLogout} className="rounded-xl h-8 w-8 text-slate-500 hover:text-slate-900" title="Sign out">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button variant="outline" onClick={handleOpenTrackApplication} className="rounded-2xl min-h-[44px]">
+                Track Application
+              </Button>
+            )}
+          </div>
         </div>
 
-        <Card>
+        {/* Why Work With Us */}
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -731,30 +807,31 @@ const Careers = () => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <h3 className="font-semibold mb-3">Our Culture</h3>
-                  <p className="text-muted-foreground mb-4">
-                    We foster a collaborative environment where creativity thrives and innovation
-                    is encouraged. Our team values work-life balance, continuous learning, and
-                    delivering exceptional results for our clients.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="mb-3 font-semibold">Benefits & Perks</h3>
-                  <div className="grid gap-2">
-                    {benefits.map((benefit, index) => (
-                      <div key={index} className="flex items-center text-sm text-muted-foreground">
-                        <div className="mr-3 h-2 w-2 rounded-full bg-primary"></div>
-                        {benefit}
-                      </div>
-                    ))}
-                  </div>
+              <div>
+                <h3 className="font-semibold mb-3">Our Culture</h3>
+                <p className="text-muted-foreground mb-4">
+                  We foster a collaborative environment where creativity thrives and innovation
+                  is encouraged. Our team values work-life balance, continuous learning, and
+                  delivering exceptional results for our clients.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-3 font-semibold">Benefits & Perks</h3>
+                <div className="grid gap-2">
+                  {benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-center text-sm text-muted-foreground">
+                      <div className="mr-3 h-2 w-2 rounded-full bg-primary"></div>
+                      {benefit}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="mb-12">
+        {/* Hiring Locations */}
+        <div className="my-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -777,6 +854,7 @@ const Careers = () => {
           </Card>
         </div>
 
+        {/* Eligibility & Salary */}
         <div className="mb-12">
           <Card>
             <CardHeader>
@@ -809,6 +887,7 @@ const Careers = () => {
           </Card>
         </div>
 
+        {/* Current Job Openings */}
         <div className="mb-12">
           <h2 className="mb-8 text-3xl font-bold">Current Openings</h2>
           <div className="space-y-6">
@@ -855,11 +934,11 @@ const Careers = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Button onClick={() => handleApplyNow(job)} className="w-full sm:w-auto">
+                    <Button onClick={() => handleApplyNow(job)} className="w-full sm:w-auto min-h-[44px]">
                       <Mail className="mr-2 h-4 w-4" />
                       Apply Now
                     </Button>
-                    <Button variant="outline" onClick={() => setSelectedJob(job)} className="w-full sm:w-auto">
+                    <Button variant="outline" onClick={() => setSelectedJob(job)} className="w-full sm:w-auto min-h-[44px]">
                       View Details
                     </Button>
                   </div>
@@ -869,106 +948,103 @@ const Careers = () => {
           </div>
         </div>
 
-        <div ref={applicationSectionRef} className="mb-8">
-          <Card className="border-0 bg-transparent shadow-none">
-            <CardHeader className="px-0 pb-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-slate-900" />
-                <CardTitle className="text-2xl font-semibold text-slate-900">Applicant journey</CardTitle>
-              </div>
-              <CardDescription className="max-w-2xl text-sm leading-7 text-slate-600">
-                A premium, enterprise-grade application experience designed for modern hiring workflows.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
-              <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="rounded-[32px] border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.35)]">
-                  <div className="mb-6 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-medium text-slate-200">
-                    {applicationJob ? `Applying for ${applicationJob.title}` : 'Select a role to begin'}
-                  </div>
-                  <h3 className="text-2xl font-semibold">Start your hiring journey</h3>
-                  <p className="mt-3 max-w-xl text-sm leading-7 text-slate-300">
-                    Complete email verification, share your details, pay the registration fee, and track your progress from a polished applicant dashboard.
-                  </p>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                    {['Email verification', 'Application form', 'Payment & dashboard'].map((step) => (
-                      <div key={step} className="rounded-2xl border border-white/10 bg-white/10 p-3 text-sm text-slate-200">
-                        {step}
-                      </div>
-                    ))}
-                  </div>
+        {/* Send Resume Card */}
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle>Don't See the Right Position?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              We're always interested in meeting talented individuals. Verify your email to submit your application.
+            </p>
+            <Button onClick={() => handleApplyNow(jobOpenings[0])} className="min-h-[44px]">
+              <Mail className="mr-2 h-4 w-4" />
+              Send Your Resume
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* CANDIDATE EMAIL OTP AUTHENTICATION MODAL */}
+        <CandidateOtpModal
+          open={isOtpModalOpen}
+          onOpenChange={setIsOtpModalOpen}
+          initialEmail={applicantEmail}
+          onSendOtp={handleSendOtp}
+          onVerifyOtp={handleVerifyOtp}
+          isLoading={isLoading}
+        />
+
+        {/* APPLICATION WIZARD / PAYMENT / DASHBOARD DIALOG MODAL */}
+        <Dialog open={isApplicationModalOpen} onOpenChange={setIsApplicationModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto border-slate-200 bg-slate-50 p-4 sm:p-8 rounded-3xl">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-2xl font-semibold text-slate-900">
+                {applicationStep === 'application' && (applicationJob ? `Applying for ${applicationJob.title}` : 'Candidate Application')}
+                {applicationStep === 'payment' && 'Candidate Verification Payment'}
+                {applicationStep === 'success' && 'Application Verified'}
+                {applicationStep === 'dashboard' && 'Candidate Dashboard'}
+              </DialogTitle>
+              <DialogDescription>
+                W3 Software Solutions • Corporate Candidate Portal
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {applicationStep === "application" && (
+                <ApplicationWizard onSubmit={handleApplicationSubmit} initialData={{
+                  fullName: applicantName,
+                  email: applicantEmail,
+                  mobile: applicantMobile,
+                  dateOfBirth: '',
+                  gender: '',
+                  country: '',
+                  state: '',
+                  city: '',
+                  postalCode: '',
+                  address: '',
+                  qualification: '',
+                  college: '',
+                  university: '',
+                  percentage: '',
+                  passingYear: '',
+                  experience: '',
+                  skills: '',
+                  portfolio: '',
+                  linkedIn: '',
+                  declarationAccepted: false,
+                }} />
+              )}
+
+              {applicationStep === "payment" && (
+                <RegistrationPayment
+                  onPay={handleMakePayment}
+                  onBack={() => {
+                    setPaymentError("");
+                    setApplicationStep("application");
+                  }}
+                  isLoading={isLoading}
+                  errorMessage={paymentError}
+                />
+              )}
+
+              {applicationStep === "success" && (
+                <PaymentSuccess referenceNumber={applicationReference} onGoToDashboard={handleGoToDashboard} />
+              )}
+
+              {applicationStep === "dashboard" && (
+                <ApplicantDashboard onLogout={handleLogout} />
+              )}
+
+              {feedbackMessage ? (
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
+                  {feedbackMessage}
                 </div>
+              ) : null}
+            </div>
+          </DialogContent>
+        </Dialog>
 
-                <div className="space-y-4">
-                  {applicationStep === "auth" && (
-                    <EmailAuthCard
-                      email={applicantEmail}
-                      onEmailChange={setApplicantEmail}
-                      onContinue={handleContinueAuth}
-                      onBack={() => setApplicationStep("auth")}
-                      isLoading={isLoading}
-                    />
-                  )}
-                  {applicationStep === "otp" && (
-                    <OtpVerificationCard
-                      email={applicantEmail}
-                      onVerify={handleVerifyOtp}
-                      onChangeEmail={() => setApplicationStep("auth")}
-                      onResend={handleResendOtp}
-                      isLoading={isLoading}
-                    />
-                  )}
-                  {applicationStep === "application" && (
-                    <ApplicationWizard onSubmit={handleApplicationSubmit} initialData={{
-                      fullName: '',
-                      email: applicantEmail,
-                      mobile: '',
-                      dateOfBirth: '',
-                      gender: '',
-                      country: '',
-                      state: '',
-                      city: '',
-                      postalCode: '',
-                      address: '',
-                      qualification: '',
-                      college: '',
-                      university: '',
-                      percentage: '',
-                      passingYear: '',
-                      experience: '',
-                      skills: '',
-                      portfolio: '',
-                      linkedIn: '',
-                      declarationAccepted: false,
-                    }} />
-                  )}
-                  {applicationStep === "payment" && (
-                    <RegistrationPayment
-                      onPay={handleMakePayment}
-                      onBack={() => {
-                        setPaymentError("");
-                        setApplicationStep("application");
-                      }}
-                      isLoading={isLoading}
-                      errorMessage={paymentError}
-                    />
-                  )}
-                  {applicationStep === "success" && (
-                    <PaymentSuccess referenceNumber={applicationReference} onGoToDashboard={handleGoToDashboard} />
-                  )}
-                  {applicationStep === "dashboard" && <ApplicantDashboard onLogout={() => { setApplicationStep("auth"); setApplicantEmail(""); setApplicationReference(""); }} />}
-
-                  {feedbackMessage ? (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      {feedbackMessage}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+        {/* JOB DETAILS DIALOG */}
         <Dialog open={!!selectedJob} onOpenChange={() => setSelectedJob(null)}>
           <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
             {selectedJob && (
@@ -1085,8 +1161,8 @@ const Careers = () => {
                   </div>
 
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
-                    <p className="font-semibold text-foreground">Application Registration Fee: ₹49</p>
-                    <p className="mt-2">This fee is charged only for application processing and verification. Payment does not guarantee interview selection or employment.</p>
+                    <p className="font-semibold text-foreground">Application Processing Fee: ₹49</p>
+                    <p className="mt-2">This fee is charged only for application processing and candidate verification. Payment does not guarantee interview selection or employment.</p>
                   </div>
 
                   <div>
@@ -1112,29 +1188,13 @@ const Careers = () => {
                 </div>
 
                 <DialogFooter className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-start">
-                  <Button onClick={() => { setSelectedJob(null); if (selectedJob) handleApplyNow(selectedJob); }} className="w-full sm:w-auto">Apply Now</Button>
-                  <Button variant="outline" onClick={() => setSelectedJob(null)} className="w-full sm:w-auto">Back to Careers</Button>
+                  <Button onClick={() => { setSelectedJob(null); if (selectedJob) handleApplyNow(selectedJob); }} className="w-full sm:w-auto min-h-[44px]">Apply Now</Button>
+                  <Button variant="outline" onClick={() => setSelectedJob(null)} className="w-full sm:w-auto min-h-[44px]">Back to Careers</Button>
                 </DialogFooter>
               </>
             )}
           </DialogContent>
         </Dialog>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Don't See the Right Position?</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              We're always interested in meeting talented individuals. Send us your resume and
-              tell us about your skills and interests.
-            </p>
-            <Button onClick={() => handleApplyNow(jobOpenings[0])}>
-              <Mail className="mr-2 h-4 w-4" />
-              Send Your Resume
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

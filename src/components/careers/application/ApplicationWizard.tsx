@@ -115,12 +115,12 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
   };
 
   return (
-    <Card className="border-slate-200 bg-white/90 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.35)]">
+    <Card className="border-slate-200 bg-white shadow-md rounded-2xl">
       <CardHeader className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <CardTitle className="text-2xl font-semibold text-slate-900">Application form</CardTitle>
-            <CardDescription className="mt-2 text-sm text-slate-600">
+            <CardDescription className="mt-1 text-sm text-slate-600">
               {steps[activeStep].description}
             </CardDescription>
           </div>
@@ -142,23 +142,23 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">Full name</label>
-              <Input value={formData.fullName} onChange={(event) => updateField('fullName', event.target.value)} placeholder="Aarav Sharma" />
+              <Input value={formData.fullName} onChange={(event) => updateField('fullName', event.target.value)} placeholder="Enter your full name" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Email</label>
-              <Input type="email" value={formData.email} onChange={(event) => updateField('email', event.target.value)} placeholder="aarav@example.com" />
+              <Input type="email" value={formData.email} onChange={(event) => updateField('email', event.target.value)} placeholder="Enter your email address" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Mobile</label>
-              <Input value={formData.mobile} onChange={(event) => updateField('mobile', event.target.value)} placeholder="+91 98765 43210" />
+              <Input value={formData.mobile} onChange={(event) => updateField('mobile', event.target.value)} placeholder="Enter your mobile number" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Date of birth</label>
-              <Input type="date" value={formData.dateOfBirth} onChange={(event) => updateField('dateOfBirth', event.target.value)} />
+              <Input type="date" value={formData.dateOfBirth} onChange={(event) => updateField('dateOfBirth', event.target.value)} className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Gender</label>
-              <Input value={formData.gender} onChange={(event) => updateField('gender', event.target.value)} placeholder="Male / Female / Other" />
+              <Input value={formData.gender} onChange={(event) => updateField('gender', event.target.value)} placeholder="Male / Female / Other" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
           </div>
         )}
@@ -167,23 +167,23 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Country</label>
-              <Input value={formData.country} onChange={(event) => updateField('country', event.target.value)} placeholder="India" />
+              <Input value={formData.country} onChange={(event) => updateField('country', event.target.value)} placeholder="Enter country" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">State</label>
-              <Input value={formData.state} onChange={(event) => updateField('state', event.target.value)} placeholder="Rajasthan" />
+              <Input value={formData.state} onChange={(event) => updateField('state', event.target.value)} placeholder="Enter state" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">City</label>
-              <Input value={formData.city} onChange={(event) => updateField('city', event.target.value)} placeholder="Jaipur" />
+              <Input value={formData.city} onChange={(event) => updateField('city', event.target.value)} placeholder="Enter city" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Postal code</label>
-              <Input value={formData.postalCode} onChange={(event) => updateField('postalCode', event.target.value)} placeholder="302001" />
+              <Input value={formData.postalCode} onChange={(event) => updateField('postalCode', event.target.value)} placeholder="Enter postal code" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">Full address</label>
-              <Textarea value={formData.address} onChange={(event) => updateField('address', event.target.value)} placeholder="Street, area, landmark" className="min-h-24" />
+              <Textarea value={formData.address} onChange={(event) => updateField('address', event.target.value)} placeholder="Enter street address, landmark" className="min-h-24 rounded-2xl" />
             </div>
           </div>
         )}
@@ -192,23 +192,23 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Qualification</label>
-              <Input value={formData.qualification} onChange={(event) => updateField('qualification', event.target.value)} placeholder="B.Tech / MCA" />
+              <Input value={formData.qualification} onChange={(event) => updateField('qualification', event.target.value)} placeholder="Highest qualification (e.g. B.Tech, MCA)" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">College</label>
-              <Input value={formData.college} onChange={(event) => updateField('college', event.target.value)} placeholder="ABC College" />
+              <Input value={formData.college} onChange={(event) => updateField('college', event.target.value)} placeholder="College / Institute name" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">University</label>
-              <Input value={formData.university} onChange={(event) => updateField('university', event.target.value)} placeholder="University Name" />
+              <Input value={formData.university} onChange={(event) => updateField('university', event.target.value)} placeholder="University name" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Percentage / CGPA</label>
-              <Input value={formData.percentage} onChange={(event) => updateField('percentage', event.target.value)} placeholder="88%" />
+              <Input value={formData.percentage} onChange={(event) => updateField('percentage', event.target.value)} placeholder="Percentage or CGPA" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">Passing year</label>
-              <Input value={formData.passingYear} onChange={(event) => updateField('passingYear', event.target.value)} placeholder="2024" />
+              <Input value={formData.passingYear} onChange={(event) => updateField('passingYear', event.target.value)} placeholder="Passing year" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
           </div>
         )}
@@ -217,11 +217,11 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">Experience</label>
-              <Input value={formData.experience} onChange={(event) => updateField('experience', event.target.value)} placeholder="2 years" />
+              <Input value={formData.experience} onChange={(event) => updateField('experience', event.target.value)} placeholder="Experience summary (e.g. Freshers / 2 years)" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">Skills</label>
-              <Input value={formData.skills} onChange={(event) => updateField('skills', event.target.value)} placeholder="React, Node.js, TypeScript" />
+              <Input value={formData.skills} onChange={(event) => updateField('skills', event.target.value)} placeholder="Key skills (e.g. React, Node.js)" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">Resume upload (PDF, DOC, DOCX - Max 5MB)</label>
@@ -271,7 +271,7 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="rounded-2xl"
+                    className="rounded-2xl min-h-[44px]"
                   >
                     {uploading ? 'Uploading...' : formData.resumePath ? 'Replace file' : 'Choose file'}
                   </Button>
@@ -281,7 +281,7 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
                       variant="ghost"
                       onClick={handleRemoveResume}
                       disabled={uploading}
-                      className="rounded-2xl text-red-600 hover:bg-red-50 hover:text-red-700"
+                      className="rounded-2xl text-red-600 hover:bg-red-50 hover:text-red-700 min-h-[44px]"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -291,11 +291,11 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Portfolio</label>
-              <Input value={formData.portfolio} onChange={(event) => updateField('portfolio', event.target.value)} placeholder="https://portfolio.com" />
+              <Input value={formData.portfolio} onChange={(event) => updateField('portfolio', event.target.value)} placeholder="https://portfolio.com" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">LinkedIn</label>
-              <Input value={formData.linkedIn} onChange={(event) => updateField('linkedIn', event.target.value)} placeholder="https://linkedin.com/in/you" />
+              <Input value={formData.linkedIn} onChange={(event) => updateField('linkedIn', event.target.value)} placeholder="https://linkedin.com/in/username" className="h-12 rounded-2xl min-h-[44px]" />
             </div>
           </div>
         )}
@@ -319,17 +319,17 @@ export function ApplicationWizard({ onSubmit, initialData }: ApplicationWizardPr
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <Button type="button" variant="outline" onClick={prevStep} className="rounded-2xl" disabled={activeStep === 0}>
+          <Button type="button" variant="outline" onClick={prevStep} className="rounded-2xl min-h-[44px]" disabled={activeStep === 0}>
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           {activeStep < steps.length - 1 ? (
-            <Button type="button" onClick={nextStep} className="rounded-2xl">
+            <Button type="button" onClick={nextStep} className="rounded-2xl min-h-[44px]">
               Continue
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button type="button" onClick={handleSubmit} className="rounded-2xl" disabled={!formData.declarationAccepted || uploading}>
+            <Button type="button" onClick={handleSubmit} className="rounded-2xl min-h-[44px]" disabled={!formData.declarationAccepted || uploading}>
               Submit application
             </Button>
           )}
