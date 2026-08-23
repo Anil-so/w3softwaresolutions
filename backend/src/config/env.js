@@ -9,16 +9,11 @@ function validateEnvironment() {
     warnings.push('Supabase credentials are not configured.');
   }
 
-  if (!process.env.RAZORPAY_KEY_ID && !process.env.VITE_RAZORPAY_KEY_ID) {
-    warnings.push('RAZORPAY_KEY_ID is not configured; payment order creation will fail.');
-  }
-
-  if (!process.env.RAZORPAY_KEY_SECRET) {
-    warnings.push('RAZORPAY_KEY_SECRET is not configured; payment signature verification will fail.');
+  if (!process.env.COMPANY_UPI_ID && !process.env.VITE_COMPANY_UPI_ID && !process.env.NEXT_PUBLIC_COMPANY_UPI_ID) {
+    warnings.push('COMPANY_UPI_ID is not configured; UPI Intent generation will use default payee ID.');
   }
 
   return { warnings };
 }
 
 module.exports = { validateEnvironment };
-

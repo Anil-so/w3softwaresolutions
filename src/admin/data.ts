@@ -5,7 +5,7 @@ export const adminNavItems = [
   { title: 'Jobs', href: '/admin/jobs', description: 'Create and manage jobs' },
   { title: 'Applications', href: '/admin/applications', description: 'Review applicants' },
   { title: 'Candidates', href: '/admin/candidates', description: 'Profiles and notes' },
-  { title: 'Payments', href: '/admin/payments', description: 'Razorpay and invoices' },
+  { title: 'Payments', href: '/admin/payments', description: 'UPI payments and invoices' },
   { title: 'Interviews', href: '/admin/interviews', description: 'Scheduling and updates' },
   { title: 'Career Page', href: '/admin/career-page', description: 'Content and hiring status' },
   { title: 'Locations', href: '/admin/locations', description: 'Company offices' },

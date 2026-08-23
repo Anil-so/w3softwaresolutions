@@ -17,19 +17,7 @@ import {
   verifyEmailOtp,
 } from "@/lib/supabase";
 
-function loadRazorpayScript(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if ((window as any).Razorpay) {
-      resolve(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-}
+
 
 type JobOpening = {
   id: number;
@@ -74,6 +62,18 @@ const Careers = () => {
   const [paymentError, setPaymentError] = useState("");
   const [applicantMobile, setApplicantMobile] = useState("");
   const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
+
+  // UPI Payment states
+  const [upiOrderData, setUpiOrderData] = useState<{
+    transaction_reference: string;
+    upi_uri: string;
+    amount: number;
+    payee_vpa: string;
+    payee_name: string;
+    note: string;
+  } | null>(null);
+  const [isCheckingPaymentStatus, setIsCheckingPaymentStatus] = useState(false);
+  const [currentPaymentStatus, setCurrentPaymentStatus] = useState<string>("PENDING");
 
   useEffect(() => {
     async function syncApplicantFromUser(user: any) {
@@ -615,129 +615,141 @@ const Careers = () => {
         return;
       }
 
-      const { data: orderData, error: orderError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { applicant_id: currentApplicantId },
-      });
+      // 1. Try Supabase Edge Function 'create-upi-order'
+      let orderRes: any = null;
+      try {
+        const { data, error } = await supabase.functions.invoke("create-upi-order", {
+          body: { applicant_id: currentApplicantId },
+        });
 
-      if (orderError) {
-        let errDesc = orderError.message || "Failed to create payment order.";
-        try {
-          if (orderError.context) {
-            const res = orderError.context as Response;
-            if (typeof res.json === 'function') {
-              const cloned = res.clone ? res.clone() : res;
-              const parsed = await cloned.json();
-              if (parsed?.error) errDesc = parsed.error;
-              if (parsed?.already_paid) {
-                setApplicationStep("dashboard");
-                setFeedbackMessage("Your payment has already been verified.");
-                return;
-              }
-            }
-          }
-        } catch (_) {
-          try {
-            if (orderError.context && typeof (orderError.context as Response).text === 'function') {
-              const text = await (orderError.context as Response).text();
-              if (text) errDesc = text;
-            }
-          } catch (__) {}
-        }
-        throw new Error(errDesc);
-      }
-
-      if (!orderData?.order_id || !orderData?.key_id) {
-        if (orderData?.already_paid) {
+        if (!error && data?.success) {
+          orderRes = data;
+        } else if (data?.already_paid) {
           setApplicationStep("dashboard");
           setFeedbackMessage("Your payment has already been verified.");
           return;
         }
-        throw new Error(orderData?.error || "Invalid response received from Razorpay order service.");
+      } catch (e) {
+        console.warn("Edge function invocation fallback to database order generation:", e);
       }
 
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        throw new Error("Razorpay Checkout SDK failed to load. Please check your internet connection.");
-      }
+      // 2. Direct database / fallback creation if edge function not running locally
+      if (!orderRes) {
+        const payeeUpiId = import.meta.env.VITE_COMPANY_UPI_ID || "khadoliyavikash-1@okhdfcbank";
+        const payeeName = import.meta.env.VITE_COMPANY_NAME || "W3 Software Solutions";
+        const amount = 49.00;
+        const currency = "INR";
+        const appRef = applicationReference || (currentApplicantId ? currentApplicantId.slice(0, 8) : '1024');
+        const note = `Registration Fee - Order #${appRef}`;
 
-      const options = {
-        key: orderData.key_id,
-        amount: orderData.amount,
-        currency: orderData.currency || "INR",
-        name: "W3 Software Solutions",
-        description: "Application Processing Fee",
-        order_id: orderData.order_id,
-        prefill: {
-          email: session.user.email,
-          contact: applicantMobile || undefined,
-        },
-        theme: {
-          color: "#0f172a",
-        },
-        handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
-          setIsLoading(true);
-          try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-            });
+        // Idempotency: Check existing PENDING payment for this applicant
+        let transactionRef = `TR_${Date.now()}_${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
-            if (verifyError) {
-              let vErrDesc = verifyError.message || "Payment signature verification failed on server.";
-              try {
-                if (verifyError.context) {
-                  const parsedV = await verifyError.context.json();
-                  if (parsedV.error) vErrDesc = parsedV.error;
-                }
-              } catch (_) {}
-              throw new Error(vErrDesc);
-            }
+        if (currentApplicantId) {
+          const { data: existingPayment } = await supabase
+            .from("payments")
+            .select("transaction_reference")
+            .eq("applicant_id", currentApplicantId)
+            .eq("status", "PENDING")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-            if (!verifyData?.success) {
-              throw new Error(verifyData?.error || "Payment verification failed on server.");
-            }
-
-            setPaymentError("");
-            setFeedbackMessage("");
-            setApplicationStep("success");
-          } catch (vErr: any) {
-            console.error("Payment verification error:", vErr);
-            const msg = vErr.message || "Payment verification failed on server.";
-            setPaymentError(msg);
-            setFeedbackMessage(msg);
-          } finally {
-            setIsLoading(false);
+          if (existingPayment?.transaction_reference) {
+            transactionRef = existingPayment.transaction_reference;
+          } else {
+            await supabase.from("payments").insert([{
+              applicant_id: currentApplicantId,
+              amount,
+              currency,
+              payment_method: "upi_intent",
+              status: "PENDING",
+              transaction_reference: transactionRef,
+              payment_note: note,
+            }]);
           }
-        },
-        modal: {
-          ondismiss: () => {
-            setIsLoading(false);
-            const msg = "Payment was not completed. Your application has not been marked as paid.";
-            setPaymentError(msg);
-          },
-        },
-      };
+        }
 
-      const razorpayWindow = new (window as any).Razorpay(options);
-      razorpayWindow.on("payment.failed", (failRes: any) => {
-        console.error("Razorpay payment failed:", failRes);
-        const description = failRes?.error?.description || failRes?.error?.reason || "Payment was declined or failed.";
-        const msg = `Payment was not completed. Your application has not been marked as paid. (${description})`;
-        setPaymentError(msg);
-        setFeedbackMessage(msg);
-        setIsLoading(false);
-      });
+        const upiParams = new URLSearchParams({
+          pa: payeeUpiId,
+          pn: payeeName,
+          am: amount.toFixed(2),
+          cu: currency,
+          tn: note,
+          tr: transactionRef,
+        });
 
-      razorpayWindow.open();
+        orderRes = {
+          success: true,
+          transaction_reference: transactionRef,
+          upi_uri: `upi://pay?${upiParams.toString()}`,
+          amount,
+          currency,
+          payee_vpa: payeeUpiId,
+          payee_name: payeeName,
+          note,
+        };
+      }
+
+      setUpiOrderData(orderRes);
+      setCurrentPaymentStatus("PENDING");
+      setFeedbackMessage("UPI Payment link generated successfully! Scan the QR code or tap Pay with UPI.");
     } catch (err: any) {
-      console.error("Make payment error:", err);
-      const msg = err.message || "Failed to launch Razorpay checkout.";
+      console.error("Make UPI payment error:", err);
+      const msg = err.message || "Failed to generate UPI payment details.";
       setPaymentError(msg);
       setFeedbackMessage(msg);
+    } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCheckPaymentStatus = async () => {
+    if (!upiOrderData?.transaction_reference) return;
+    setIsCheckingPaymentStatus(true);
+    setPaymentError("");
+
+    try {
+      let statusResult: any = null;
+
+      try {
+        const { data, error } = await supabase.functions.invoke("verify-upi-status", {
+          body: { transaction_reference: upiOrderData.transaction_reference },
+        });
+        if (!error && data?.success) {
+          statusResult = data;
+        }
+      } catch (e) {
+        console.warn("Edge function status check fallback:", e);
+      }
+
+      if (!statusResult) {
+        const { data: dbPayment } = await supabase
+          .from("payments")
+          .select("status")
+          .eq("transaction_reference", upiOrderData.transaction_reference)
+          .maybeSingle();
+
+        if (dbPayment) {
+          statusResult = { status: dbPayment.status };
+        }
+      }
+
+      const status = statusResult?.status || "PENDING";
+      setCurrentPaymentStatus(status);
+
+      if (status === "PAID" || status === "paid" || status === "captured") {
+        setPaymentError("");
+        setFeedbackMessage("Payment verified successfully!");
+        setApplicationStep("success");
+      } else {
+        setFeedbackMessage("Payment status: PENDING reconciliation. Once verified by server, your application will update.");
+      }
+    } catch (err: any) {
+      console.error("Check status error:", err);
+      setFeedbackMessage("Could not check payment status at this moment. Please try again.");
+    } finally {
+      setIsCheckingPaymentStatus(false);
     }
   };
 
@@ -1024,6 +1036,12 @@ const Careers = () => {
                   }}
                   isLoading={isLoading}
                   errorMessage={paymentError}
+                  orderData={upiOrderData}
+                  onCheckStatus={handleCheckPaymentStatus}
+                  isCheckingStatus={isCheckingPaymentStatus}
+                  paymentStatus={currentPaymentStatus}
+                  onGoToDashboard={handleGoToDashboard}
+                  orderReferenceId={applicationReference || '1024'}
                 />
               )}
 

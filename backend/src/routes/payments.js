@@ -1,6 +1,4 @@
 const express = require('express');
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
 const { supabase } = require('../config/supabase');
 const authenticateToken = require('../middleware/auth');
 const { asyncHandler } = require('../utils/asyncHandler');
@@ -8,101 +6,28 @@ const { AppError } = require('../utils/appError');
 
 const router = express.Router();
 
-function safeCompare(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string') return false;
-  const bufA = Buffer.from(a, 'utf-8');
-  const bufB = Buffer.from(b, 'utf-8');
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
-}
-
-// POST /api/payments/create-order
-router.post('/create-order', authenticateToken, asyncHandler(async (req, res) => {
-  const razorpayKeyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID;
-  const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-
-  if (!razorpayKeyId || !razorpayKeySecret) {
-    throw new AppError(500, 'Razorpay credentials are not configured on server.');
-  }
-
-  const razorpay = new Razorpay({
-    key_id: razorpayKeyId,
-    key_secret: razorpayKeySecret,
-  });
+// POST /api/payments/create-upi-order
+router.post('/create-upi-order', authenticateToken, asyncHandler(async (req, res) => {
+  const payeeUpiId = process.env.COMPANY_UPI_ID || process.env.NEXT_PUBLIC_COMPANY_UPI_ID || process.env.VITE_COMPANY_UPI_ID || 'khadoliyavikash-1@okhdfcbank';
+  const payeeName = process.env.COMPANY_NAME || process.env.NEXT_PUBLIC_COMPANY_NAME || process.env.VITE_COMPANY_NAME || 'W3 Software Solutions';
 
   const { applicant_id } = req.body || {};
   let targetApplicantId = applicant_id;
+  let applicationRef = '1024';
 
   if (!targetApplicantId && req.user) {
     const { data: applicant } = await supabase
       .from('applicants')
-      .select('id')
+      .select('id, application_number, payment_status')
       .or(`user_id.eq.${req.user.id},email.eq.${req.user.email}`)
       .maybeSingle();
 
     if (applicant) {
       targetApplicantId = applicant.id;
-    }
-  }
-
-  const registrationFeePaise = 4900; // ₹49.00
-  const currency = 'INR';
-
-  const options = {
-    amount: registrationFeePaise,
-    currency,
-    receipt: `rcpt_${targetApplicantId || req.user.id}_${Date.now()}`.slice(0, 40),
-    notes: {
-      userId: req.user.id,
-      applicantId: targetApplicantId || '',
-      email: req.user.email || '',
-    },
-  };
-
-  const order = await razorpay.orders.create(options);
-
-  res.json({
-    success: true,
-    orderId: order.id,
-    amount: order.amount,
-    currency: order.currency,
-    keyId: razorpayKeyId,
-  });
-}));
-
-// POST /api/payments/verify
-router.post('/verify', authenticateToken, asyncHandler(async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, applicant_id } = req.body || {};
-
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-    throw new AppError(400, 'Missing Razorpay verification payload.');
-  }
-
-  const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-  if (!razorpayKeySecret) {
-    throw new AppError(500, 'Razorpay key secret is not configured.');
-  }
-
-  const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
-  const expectedSignature = crypto
-    .createHmac('sha256', razorpayKeySecret)
-    .update(payload)
-    .digest('hex');
-
-  if (!safeCompare(expectedSignature, razorpay_signature)) {
-    throw new AppError(400, 'Invalid payment signature verification failed.');
-  }
-
-  let targetApplicantId = applicant_id;
-  if (!targetApplicantId && req.user) {
-    const { data: applicant } = await supabase
-      .from('applicants')
-      .select('id')
-      .or(`user_id.eq.${req.user.id},email.eq.${req.user.email}`)
-      .maybeSingle();
-
-    if (applicant) {
-      targetApplicantId = applicant.id;
+      applicationRef = applicant.application_number || applicant.id.slice(0, 8);
+      if (applicant.payment_status === 'verified') {
+        return res.status(400).json({ success: false, error: 'Payment already verified.', already_paid: true });
+      }
     }
   }
 
@@ -110,115 +35,94 @@ router.post('/verify', authenticateToken, asyncHandler(async (req, res) => {
     throw new AppError(404, 'Associated applicant record not found.');
   }
 
+  const amount = 49.00;
+  const currency = 'INR';
+  const note = `Registration Fee - Order #${applicationRef}`;
+
+  // Check existing pending payment to prevent duplicate orders
   const { data: existingPayment } = await supabase
     .from('payments')
-    .select('id')
-    .or(`razorpay_payment_id.eq.${razorpay_payment_id},razorpay_order_id.eq.${razorpay_order_id}`)
+    .select('id, transaction_reference, status')
+    .eq('applicant_id', targetApplicantId)
+    .eq('status', 'PENDING')
+    .order('created_at', { ascending: false })
+    .limit(1)
     .maybeSingle();
 
-  if (!existingPayment) {
-    const { error: insertError } = await supabase.from('payments').insert([
-      {
-        applicant_id: targetApplicantId,
-        razorpay_order_id,
-        razorpay_payment_id,
-        razorpay_signature,
-        payment_method: 'razorpay',
-        amount: 49.00,
-        currency: 'INR',
-        status: 'captured',
-        payment_timestamp: new Date().toISOString(),
-      },
-    ]);
+  let transactionRef = `TR_${Date.now()}_${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
-    if (insertError) {
-      console.error('[payments/verify] Insert error:', insertError);
-      throw new AppError(500, 'Failed to store payment record in database.');
+  if (existingPayment && existingPayment.transaction_reference) {
+    transactionRef = existingPayment.transaction_reference;
+  } else {
+    // Insert pending payment record
+    const { error: insertErr } = await supabase
+      .from('payments')
+      .insert([{
+        applicant_id: targetApplicantId,
+        amount,
+        currency,
+        payment_method: 'upi_intent',
+        status: 'PENDING',
+        transaction_reference: transactionRef,
+        payment_note: note,
+        created_by: req.user.id,
+      }]);
+
+    if (insertErr) {
+      console.error('[payments/create-upi-order] Insert error:', insertErr);
     }
   }
 
-  const { error: updateError } = await supabase
-    .from('applicants')
-    .update({
-      payment_status: 'verified',
-      application_status: 'submitted',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', targetApplicantId);
-
-  if (updateError) {
-    console.error('[payments/verify] Applicant update error:', updateError);
-  }
+  const upiParams = new URLSearchParams({
+    pa: payeeUpiId,
+    pn: payeeName,
+    am: amount.toFixed(2),
+    cu: currency,
+    tn: note,
+    tr: transactionRef,
+  });
+  const upiUri = `upi://pay?${upiParams.toString()}`;
 
   res.json({
     success: true,
-    message: 'Payment verified successfully and application submitted.',
-    paymentId: razorpay_payment_id,
-    orderId: razorpay_order_id,
+    transaction_reference: transactionRef,
+    upi_uri: upiUri,
+    amount,
+    currency,
+    payee_vpa: payeeUpiId,
+    payee_name: payeeName,
+    note,
   });
 }));
 
-// POST /api/payments/webhook
-router.post('/webhook', asyncHandler(async (req, res) => {
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  const signature = req.headers['x-razorpay-signature'];
+// GET /api/payments/status/:transactionRef
+router.get('/status/:transactionRef', authenticateToken, asyncHandler(async (req, res) => {
+  const { transactionRef } = req.params;
 
-  if (!webhookSecret || !signature) {
-    return res.status(400).json({ success: false, message: 'Missing webhook secret or signature.' });
+  const { data: payment, error } = await supabase
+    .from('payments')
+    .select('*, applicants(id, payment_status)')
+    .eq('transaction_reference', transactionRef)
+    .maybeSingle();
+
+  if (error || !payment) {
+    throw new AppError(404, 'Payment record not found.');
   }
 
-  const rawBody = req.rawBody || (typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
-  const expectedSignature = crypto
-    .createHmac('sha256', webhookSecret)
-    .update(rawBody)
-    .digest('hex');
+  const isPaid = payment.status === 'PAID' || payment.status === 'paid' || payment.status === 'captured';
 
-  if (!safeCompare(expectedSignature, signature)) {
-    return res.status(400).json({ success: false, message: 'Invalid webhook signature.' });
-  }
-
-  const event = req.body;
-  if (event && (event.event === 'payment.captured' || event.event === 'order.paid')) {
-    const paymentEntity = event.payload?.payment?.entity || {};
-    const razorpay_order_id = paymentEntity.order_id;
-    const razorpay_payment_id = paymentEntity.id;
-    const applicantId = paymentEntity.notes?.applicantId;
-
-    if (applicantId && razorpay_payment_id) {
-      const { data: existingPayment } = await supabase
-        .from('payments')
-        .select('id')
-        .eq('razorpay_payment_id', razorpay_payment_id)
-        .maybeSingle();
-
-      if (!existingPayment) {
-        await supabase.from('payments').insert([
-          {
-            applicant_id: applicantId,
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature: signature,
-            payment_method: 'razorpay',
-            amount: (paymentEntity.amount || 4900) / 100,
-            currency: paymentEntity.currency || 'INR',
-            status: 'captured',
-            payment_timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
-
-      await supabase
-        .from('applicants')
-        .update({
-          payment_status: 'verified',
-          application_status: 'submitted',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', applicantId);
-    }
-  }
-
-  return res.json({ success: true });
+  res.json({
+    success: true,
+    status: isPaid ? 'PAID' : payment.status || 'PENDING',
+    transaction_reference: payment.transaction_reference,
+    amount: payment.amount,
+    currency: payment.currency,
+    created_at: payment.created_at,
+    verified_at: payment.verified_at,
+    message: isPaid
+      ? 'Payment is verified.'
+      : 'Payment verification pending. Your registration will be confirmed after payment verification.',
+  });
 }));
 
 module.exports = router;
