@@ -18,6 +18,12 @@ Deno.serve(async (req) => {
     const payeeUpiId = Deno.env.get('COMPANY_UPI_ID') || Deno.env.get('NEXT_PUBLIC_COMPANY_UPI_ID') || Deno.env.get('VITE_COMPANY_UPI_ID') || 'khadoliyavikash-1@okhdfcbank';
     const payeeName = Deno.env.get('COMPANY_NAME') || Deno.env.get('NEXT_PUBLIC_COMPANY_NAME') || Deno.env.get('VITE_COMPANY_NAME') || 'W3 Software Solutions';
 
+    // Server-side test mode configuration
+    const isTestMode = Deno.env.get('UPI_TEST_MODE') !== 'false'; // Default to test mode (true) unless explicitly 'false'
+    const defaultFee = isTestMode ? 1.00 : 49.00;
+    const configuredFee = Deno.env.get('UPI_REGISTRATION_FEE');
+    const amount = configuredFee ? Number(configuredFee) : defaultFee;
+
     if (!supabaseUrl || !supabaseAnonKey) {
       return new Response(
         JSON.stringify({ error: 'Supabase environment variables not configured.' }),
@@ -81,16 +87,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Server-determined payable amount (never trust client input)
-    const amount = 49.00;
     const currency = 'INR';
     const applicationRef = applicant.application_number || `APP-${applicant.id.slice(0, 8)}`;
     const note = `Registration Fee - Order #${applicationRef}`;
 
-    // Idempotency: Check if an existing PENDING payment exists for this applicant to prevent duplicate orders
+    // Idempotency: Check if an existing PENDING payment exists for this applicant
     const { data: existingPayment } = await adminClient
       .from('payments')
-      .select('id, transaction_reference, status')
+      .select('id, transaction_reference, amount, status')
       .eq('applicant_id', applicant.id)
       .eq('status', 'PENDING')
       .order('created_at', { ascending: false })
@@ -144,6 +148,7 @@ Deno.serve(async (req) => {
         note,
         applicant_id: applicant.id,
         application_number: applicationRef,
+        test_mode: isTestMode,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

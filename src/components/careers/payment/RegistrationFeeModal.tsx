@@ -1,4 +1,4 @@
-import { ShieldCheck, ArrowRight, X } from 'lucide-react';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -21,7 +21,7 @@ export function RegistrationFeeModal({
   open,
   onOpenChange,
   orderId = '1024',
-  amount = 49,
+  amount = 1,
   onProceed,
   isLoading = false,
 }: RegistrationFeeModalProps) {
@@ -37,16 +37,16 @@ export function RegistrationFeeModal({
               Registration Fee
             </DialogTitle>
             <DialogDescription className="mt-1.5 text-sm text-slate-600 leading-relaxed">
-              A registration fee of ₹{amount} is required to complete your application.
+              A one-time registration fee of ₹{amount.toFixed(amount % 1 === 0 ? 0 : 2)} is required to complete your application.
             </DialogDescription>
           </div>
         </DialogHeader>
 
-        {/* Separately Displayed Payment Specs */}
+        {/* Separately Displayed Specs */}
         <div className="my-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3 text-sm">
           <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
             <span className="text-slate-500 font-medium">Amount</span>
-            <span className="text-lg font-bold text-slate-900">₹{amount}</span>
+            <span className="text-lg font-bold text-slate-900">₹{amount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
             <span className="text-slate-500 font-medium">Purpose</span>

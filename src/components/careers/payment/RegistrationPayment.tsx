@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, ShieldCheck, AlertCircle, Info, Smartphone, QrCode } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, ShieldCheck, AlertCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,6 +9,7 @@ import { PaymentQrCode } from './PaymentQrCode';
 import { PaymentStatus } from './PaymentStatus';
 import { RegistrationFeeModal } from './RegistrationFeeModal';
 import { isMobileBrowser } from '@/lib/upi/generateUpiIntent';
+import { captureUpiCallbackParams } from '@/lib/upi/upiDiagnosticLogger';
 
 type RegistrationPaymentProps = {
   onPay: () => void;
@@ -47,6 +48,16 @@ export function RegistrationPayment({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const isMobile = isMobileBrowser();
 
+  const currentAmount = orderData?.amount ?? 1.00;
+
+  useEffect(() => {
+    // Development research diagnostic capture
+    const params = captureUpiCallbackParams();
+    if (params) {
+      console.log('[RegistrationPayment Research Diagnostic] Return callback captured:', params);
+    }
+  }, []);
+
   const handleProceedFromModal = () => {
     setIsConfirmModalOpen(false);
     onPay();
@@ -74,38 +85,42 @@ export function RegistrationPayment({
             </div>
           ) : null}
 
-          {/* Fee Box */}
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center">
-            <p className="text-sm font-medium uppercase tracking-[0.25em] text-slate-500">Application Processing Fee</p>
-            <p className="mt-3 text-5xl font-semibold text-slate-900">₹49</p>
-            <p className="mt-2 text-sm text-slate-600">One-time application processing and candidate verification fee.</p>
+          {/* Registration Fee Summary Specs */}
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Registration Fee</p>
+            <p className="text-4xl font-extrabold text-slate-900">₹{currentAmount.toFixed(2)}</p>
+            <div className="inline-flex items-center gap-3 pt-1 text-xs text-slate-600 font-medium">
+              <span>Purpose: Application Registration</span>
+              <span>•</span>
+              <span className="font-mono bg-slate-200/80 px-2 py-0.5 rounded-md">Order ID: #{orderReferenceId}</span>
+            </div>
           </div>
 
-          {/* Order Details & UPI Flow once initiated */}
+          {/* Order Details & UPI App Triggers once initiated */}
           {orderData ? (
             <div className="space-y-5 pt-2 border-t border-slate-100">
-              {/* Mobile Intent Launcher */}
-              {isMobile ? (
-                <UpiPaymentButton
-                  payeeUpiId={orderData.payee_vpa}
-                  payeeName={orderData.payee_name}
-                  amount={orderData.amount}
-                  transactionRef={orderData.transaction_reference}
-                  note={orderData.note}
-                />
-              ) : null}
-
-              {/* Desktop QR Code & Copy UPI ID Fallback */}
-              <PaymentQrCode
+              {/* App Buttons (Google Pay, PhonePe, Paytm, BHIM, Other UPI Apps) */}
+              <UpiPaymentButton
                 payeeUpiId={orderData.payee_vpa}
                 payeeName={orderData.payee_name}
                 amount={orderData.amount}
                 transactionRef={orderData.transaction_reference}
                 note={orderData.note}
-                upiUri={orderData.upi_uri}
               />
 
-              {/* Verification Status Section */}
+              {/* Desktop Fallback (No large QR code image) */}
+              {!isMobile && (
+                <PaymentQrCode
+                  payeeUpiId={orderData.payee_vpa}
+                  payeeName={orderData.payee_name}
+                  amount={orderData.amount}
+                  transactionRef={orderData.transaction_reference}
+                  note={orderData.note}
+                  upiUri={orderData.upi_uri}
+                />
+              )}
+
+              {/* Verification Status Notice */}
               <PaymentStatus
                 status={paymentStatus}
                 transactionRef={orderData.transaction_reference}
@@ -116,30 +131,34 @@ export function RegistrationPayment({
             </div>
           ) : (
             <>
-              {/* Payment Summary */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm space-y-2">
-                <p className="font-semibold text-slate-900 text-xs uppercase tracking-wider mb-2">Payment Summary</p>
+              {/* Payment Specification Box */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm space-y-2 shadow-sm">
+                <p className="font-semibold text-slate-900 text-xs uppercase tracking-wider mb-2">Payment Details</p>
                 <div className="flex justify-between text-slate-600">
                   <span>Application Processing Fee</span>
-                  <span className="font-medium text-slate-900">₹49</span>
+                  <span className="font-medium text-slate-900">₹{currentAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Purpose</span>
+                  <span className="font-medium text-slate-900">Application Registration</span>
                 </div>
                 <div className="border-t border-slate-100 pt-2 flex justify-between font-semibold text-slate-900">
                   <span>Total Payable</span>
-                  <span>₹49</span>
+                  <span>₹{currentAmount.toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* Why is there a fee section */}
+              {/* Fee Notice */}
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm space-y-3">
                 <div className="flex items-center gap-2 font-semibold text-slate-900">
                   <Info className="h-4 w-4 text-slate-700" />
                   <span>Why is there a fee?</span>
                 </div>
                 <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">
-                  This one-time fee covers application processing, candidate verification and administrative costs associated with reviewing your application.
+                  This fee covers application processing and candidate verification.
                 </p>
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
-                  <strong>Important:</strong> Payment of this fee does not guarantee an interview, selection, employment, salary or job offer. Candidates are evaluated based on their qualifications, skills and role requirements.
+                  <strong>Important:</strong> Payment of this fee does not guarantee selection or employment. Candidates are evaluated based on qualifications and role requirements.
                 </div>
               </div>
 
@@ -152,7 +171,7 @@ export function RegistrationPayment({
                   className="mt-0.5"
                 />
                 <label htmlFor="fee-declaration" className="text-xs sm:text-sm leading-5 text-slate-700 cursor-pointer select-none">
-                  I understand that the ₹49 fee is for application processing and candidate verification and does not guarantee interview, selection or employment.
+                  I understand that the ₹{currentAmount.toFixed(0)} fee is for application processing and candidate verification and does not guarantee interview or employment.
                 </label>
               </div>
 
@@ -162,7 +181,7 @@ export function RegistrationPayment({
                 className="h-12 w-full rounded-2xl text-base font-semibold"
                 disabled={isLoading || !declarationChecked}
               >
-                {isLoading ? 'Generating UPI Payment...' : 'Pay Now — ₹49'}
+                {isLoading ? 'Generating UPI Details...' : `Pay Now — ₹${currentAmount.toFixed(0)}`}
               </Button>
             </>
           )}
@@ -188,7 +207,7 @@ export function RegistrationPayment({
         open={isConfirmModalOpen}
         onOpenChange={setIsConfirmModalOpen}
         orderId={orderReferenceId}
-        amount={49}
+        amount={currentAmount}
         onProceed={handleProceedFromModal}
         isLoading={isLoading}
       />
