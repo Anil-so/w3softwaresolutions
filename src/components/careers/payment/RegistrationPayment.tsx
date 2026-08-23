@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ShieldCheck, AlertCircle, Info, Building2 } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, AlertCircle, Info, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -49,7 +49,7 @@ export function RegistrationPayment({
   const isMobile = isMobileBrowser();
 
   const currentAmount = orderData?.amount ?? 1.00;
-  const currentPayeeName = orderData?.payee_name || 'W3 Software Solutions';
+  const currentPayeeName = orderData?.payee_name || 'Vikash Saini';
   const currentPayeeUpiId = orderData?.payee_vpa || 'khadoliyavikash-1@okhdfcbank';
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function RegistrationPayment({
           <div>
             <CardTitle className="text-2xl font-semibold text-slate-900">Application Processing Fee</CardTitle>
             <CardDescription className="mt-2 text-sm text-slate-600">
-              W3 Software Solutions • Direct UPI Payment Portal
+              Direct UPI Payment Portal
             </CardDescription>
           </div>
         </CardHeader>
@@ -93,7 +93,7 @@ export function RegistrationPayment({
             <p className="text-4xl font-extrabold text-slate-900">₹{currentAmount.toFixed(2)}</p>
             <div className="inline-flex flex-wrap items-center justify-center gap-2 pt-1 text-xs text-slate-600 font-medium">
               <span className="flex items-center gap-1 font-semibold text-slate-800">
-                <Building2 className="h-3.5 w-3.5 text-slate-500" />
+                <User className="h-3.5 w-3.5 text-slate-500" />
                 Payee: {currentPayeeName}
               </span>
               <span>•</span>
@@ -146,12 +146,20 @@ export function RegistrationPayment({
                   <span className="font-medium text-slate-900">{currentPayeeName}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
+                  <span>UPI ID</span>
+                  <span className="font-mono font-medium text-slate-900">{currentPayeeUpiId}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
                   <span>Application Processing Fee</span>
                   <span className="font-medium text-slate-900">₹{currentAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Purpose</span>
                   <span className="font-medium text-slate-900">Application Registration</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Order ID</span>
+                  <span className="font-mono font-medium text-slate-900">#{orderReferenceId}</span>
                 </div>
                 <div className="border-t border-slate-100 pt-2 flex justify-between font-semibold text-slate-900">
                   <span>Total Payable</span>

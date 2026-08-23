@@ -21,7 +21,7 @@ export async function runUpiSecurityTestSuite(): Promise<SecurityTestResult[]> {
     // Client tries to request zero amount; generator or server uses configured server amount (1.00)
     const uri = generateUpiIntentUri({
       payeeUpiId: 'khadoliyavikash-1@okhdfcbank',
-      payeeName: 'W3 Software Solutions',
+      payeeName: 'Vikash Saini',
       amount: 1.00, // Server calculated
       transactionRef: 'TR_TEST_1',
       note: 'Registration Fee - Order #1024',

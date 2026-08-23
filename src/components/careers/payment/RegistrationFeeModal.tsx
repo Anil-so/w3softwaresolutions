@@ -1,4 +1,4 @@
-import { ShieldCheck, ArrowRight, Building2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -23,7 +23,7 @@ export function RegistrationFeeModal({
   onOpenChange,
   orderId = '1024',
   amount = 1,
-  payeeName = 'W3 Software Solutions',
+  payeeName = 'Vikash Saini',
   onProceed,
   isLoading = false,
 }: RegistrationFeeModalProps) {
@@ -49,7 +49,7 @@ export function RegistrationFeeModal({
           <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
             <span className="text-slate-500 font-medium">Payee</span>
             <span className="font-semibold text-slate-900 flex items-center gap-1">
-              <Building2 className="h-3.5 w-3.5 text-slate-500" />
+              <User className="h-3.5 w-3.5 text-slate-500" />
               {payeeName}
             </span>
           </div>

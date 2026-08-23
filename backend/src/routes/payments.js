@@ -10,7 +10,7 @@ const router = express.Router();
 // POST /api/payments/create-upi-order
 router.post('/create-upi-order', authenticateToken, asyncHandler(async (req, res) => {
   const payeeUpiId = process.env.COMPANY_UPI_ID || process.env.NEXT_PUBLIC_COMPANY_UPI_ID || process.env.VITE_COMPANY_UPI_ID || 'khadoliyavikash-1@okhdfcbank';
-  const payeeName = process.env.COMPANY_NAME || process.env.NEXT_PUBLIC_COMPANY_NAME || process.env.VITE_COMPANY_NAME || 'W3 Software Solutions';
+  const payeeName = process.env.COMPANY_NAME || process.env.NEXT_PUBLIC_COMPANY_NAME || process.env.VITE_COMPANY_NAME || 'Vikash Saini';
 
   // Server-side test mode configuration
   const isTestMode = process.env.UPI_TEST_MODE !== 'false';

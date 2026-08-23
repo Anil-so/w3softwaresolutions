@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || supabaseAnonKey;
 
     const payeeUpiId = Deno.env.get('COMPANY_UPI_ID') || Deno.env.get('NEXT_PUBLIC_COMPANY_UPI_ID') || Deno.env.get('VITE_COMPANY_UPI_ID') || 'khadoliyavikash-1@okhdfcbank';
-    const payeeName = Deno.env.get('COMPANY_NAME') || Deno.env.get('NEXT_PUBLIC_COMPANY_NAME') || Deno.env.get('VITE_COMPANY_NAME') || 'W3 Software Solutions';
+    const payeeName = Deno.env.get('COMPANY_NAME') || Deno.env.get('NEXT_PUBLIC_COMPANY_NAME') || Deno.env.get('VITE_COMPANY_NAME') || 'Vikash Saini';
 
     // Server-side test mode configuration
     const isTestMode = Deno.env.get('UPI_TEST_MODE') !== 'false'; // Default to test mode (true) unless explicitly 'false'

@@ -25,7 +25,7 @@ export function generateUpiIntentUri(params: UpiIntentParams): string {
   }
 
   const cleanPayeeUpiId = payeeUpiId.trim();
-  const cleanPayeeName = (payeeName && payeeName.trim()) ? payeeName.trim() : 'W3 Software Solutions';
+  const cleanPayeeName = (payeeName && payeeName.trim()) ? payeeName.trim() : 'Vikash Saini';
   const cleanAmount = Number(amount).toFixed(2);
   const cleanNote = note ? note.trim() : 'Registration Fee';
   const cleanTxRef = transactionRef ? transactionRef.trim() : `TR_${Date.now()}`;
