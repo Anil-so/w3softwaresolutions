@@ -636,6 +636,7 @@ const Careers = () => {
       // 2. Direct database / fallback creation if edge function not running locally
       if (!orderRes) {
         const payeeUpiId = import.meta.env.VITE_COMPANY_UPI_ID || "khadoliyavikash-1@okhdfcbank";
+        const payeeName = import.meta.env.VITE_COMPANY_NAME || "W3 Software Solutions";
         const isTestMode = import.meta.env.VITE_UPI_TEST_MODE !== "false";
         const amount = import.meta.env.VITE_UPI_REGISTRATION_FEE ? Number(import.meta.env.VITE_UPI_REGISTRATION_FEE) : (isTestMode ? 1.00 : 49.00);
         const currency = "INR";

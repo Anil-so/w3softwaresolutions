@@ -1,6 +1,6 @@
 export type UpiIntentParams = {
   payeeUpiId: string;
-  payeeName: string;
+  payeeName?: string;
   amount: number;
   transactionRef: string;
   note: string;
@@ -24,14 +24,19 @@ export function generateUpiIntentUri(params: UpiIntentParams): string {
     throw new Error('Company UPI ID is missing.');
   }
 
+  const cleanPayeeUpiId = payeeUpiId.trim();
+  const cleanPayeeName = (payeeName && payeeName.trim()) ? payeeName.trim() : 'W3 Software Solutions';
   const cleanAmount = Number(amount).toFixed(2);
+  const cleanNote = note ? note.trim() : 'Registration Fee';
+  const cleanTxRef = transactionRef ? transactionRef.trim() : `TR_${Date.now()}`;
+
   const searchParams = new URLSearchParams({
-    pa: payeeUpiId.trim(),
-    pn: payeeName.trim(),
+    pa: cleanPayeeUpiId,
+    pn: cleanPayeeName,
     am: cleanAmount,
     cu: 'INR',
-    tn: note.trim(),
-    tr: transactionRef.trim(),
+    tn: cleanNote,
+    tr: cleanTxRef,
   });
 
   return `upi://pay?${searchParams.toString()}`;
@@ -73,5 +78,11 @@ export const SUPPORTED_UPI_APPS: UpiAppConfig[] = [
     name: 'Paytm',
     icon: 'paytm',
     getSchemeUrl: (upiUri) => upiUri.replace('upi://pay', 'paytmmp://pay'),
+  },
+  {
+    id: 'bhim',
+    name: 'BHIM',
+    icon: 'bhim',
+    getSchemeUrl: (upiUri) => upiUri.replace('upi://pay', 'bhim://pay'),
   },
 ];

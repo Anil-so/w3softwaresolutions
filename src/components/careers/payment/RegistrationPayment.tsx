@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ShieldCheck, AlertCircle, Info } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, AlertCircle, Info, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -49,6 +49,8 @@ export function RegistrationPayment({
   const isMobile = isMobileBrowser();
 
   const currentAmount = orderData?.amount ?? 1.00;
+  const currentPayeeName = orderData?.payee_name || 'W3 Software Solutions';
+  const currentPayeeUpiId = orderData?.payee_vpa || 'khadoliyavikash-1@okhdfcbank';
 
   useEffect(() => {
     // Development research diagnostic capture
@@ -89,7 +91,12 @@ export function RegistrationPayment({
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Registration Fee</p>
             <p className="text-4xl font-extrabold text-slate-900">₹{currentAmount.toFixed(2)}</p>
-            <div className="inline-flex items-center gap-3 pt-1 text-xs text-slate-600 font-medium">
+            <div className="inline-flex flex-wrap items-center justify-center gap-2 pt-1 text-xs text-slate-600 font-medium">
+              <span className="flex items-center gap-1 font-semibold text-slate-800">
+                <Building2 className="h-3.5 w-3.5 text-slate-500" />
+                Payee: {currentPayeeName}
+              </span>
+              <span>•</span>
               <span>Purpose: Application Registration</span>
               <span>•</span>
               <span className="font-mono bg-slate-200/80 px-2 py-0.5 rounded-md">Order ID: #{orderReferenceId}</span>
@@ -101,8 +108,8 @@ export function RegistrationPayment({
             <div className="space-y-5 pt-2 border-t border-slate-100">
               {/* App Buttons (Google Pay, PhonePe, Paytm, BHIM, Other UPI Apps) */}
               <UpiPaymentButton
-                payeeUpiId={orderData.payee_vpa}
-                payeeName={orderData.payee_name}
+                payeeUpiId={currentPayeeUpiId}
+                payeeName={currentPayeeName}
                 amount={orderData.amount}
                 transactionRef={orderData.transaction_reference}
                 note={orderData.note}
@@ -111,8 +118,8 @@ export function RegistrationPayment({
               {/* Desktop Fallback (No large QR code image) */}
               {!isMobile && (
                 <PaymentQrCode
-                  payeeUpiId={orderData.payee_vpa}
-                  payeeName={orderData.payee_name}
+                  payeeUpiId={currentPayeeUpiId}
+                  payeeName={currentPayeeName}
                   amount={orderData.amount}
                   transactionRef={orderData.transaction_reference}
                   note={orderData.note}
@@ -134,6 +141,10 @@ export function RegistrationPayment({
               {/* Payment Specification Box */}
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm space-y-2 shadow-sm">
                 <p className="font-semibold text-slate-900 text-xs uppercase tracking-wider mb-2">Payment Details</p>
+                <div className="flex justify-between text-slate-600">
+                  <span>Payee</span>
+                  <span className="font-medium text-slate-900">{currentPayeeName}</span>
+                </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Application Processing Fee</span>
                   <span className="font-medium text-slate-900">₹{currentAmount.toFixed(2)}</span>
@@ -208,6 +219,7 @@ export function RegistrationPayment({
         onOpenChange={setIsConfirmModalOpen}
         orderId={orderReferenceId}
         amount={currentAmount}
+        payeeName={currentPayeeName}
         onProceed={handleProceedFromModal}
         isLoading={isLoading}
       />

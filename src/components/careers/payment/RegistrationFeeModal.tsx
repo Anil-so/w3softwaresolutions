@@ -1,4 +1,4 @@
-import { ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,6 +13,7 @@ type RegistrationFeeModalProps = {
   onOpenChange: (open: boolean) => void;
   orderId?: string;
   amount?: number;
+  payeeName?: string;
   onProceed: () => void;
   isLoading?: boolean;
 };
@@ -22,6 +23,7 @@ export function RegistrationFeeModal({
   onOpenChange,
   orderId = '1024',
   amount = 1,
+  payeeName = 'W3 Software Solutions',
   onProceed,
   isLoading = false,
 }: RegistrationFeeModalProps) {
@@ -45,13 +47,23 @@ export function RegistrationFeeModal({
         {/* Separately Displayed Specs */}
         <div className="my-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3 text-sm">
           <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
+            <span className="text-slate-500 font-medium">Payee</span>
+            <span className="font-semibold text-slate-900 flex items-center gap-1">
+              <Building2 className="h-3.5 w-3.5 text-slate-500" />
+              {payeeName}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
             <span className="text-slate-500 font-medium">Amount</span>
             <span className="text-lg font-bold text-slate-900">₹{amount.toFixed(2)}</span>
           </div>
+
           <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
             <span className="text-slate-500 font-medium">Purpose</span>
             <span className="font-semibold text-slate-800">Application Registration</span>
           </div>
+
           <div className="flex justify-between items-center">
             <span className="text-slate-500 font-medium">Order ID</span>
             <span className="font-mono text-xs font-bold text-slate-700 bg-slate-200/70 px-2 py-0.5 rounded-md">
